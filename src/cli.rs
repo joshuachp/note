@@ -13,14 +13,30 @@ pub struct Cli {
 /// Possible sub commands
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    // Edits a note
+    Edit {
+        /// Title and name of the file
+        path: String,
+    },
+    // Alias for edit
+    E {
+        /// Title and name of the file
+        path: String,
+    },
     /// Opens the daily journal
     Journal,
     /// Opens the todo file
     Todo,
     /// Search the content of the notes
-    Search,
+    Search {
+        /// Content
+        content: String,
+    },
     /// Search the name of the files
-    Find,
+    Find {
+        /// Filename
+        filename: String,
+    },
     /// Sync the notes using the configured sync command
     Sync,
     /// Prints the shell completion
