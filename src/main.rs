@@ -1,14 +1,20 @@
+mod cli;
+mod config;
+
 use clap::Parser;
+use config::Config;
 use log::trace;
 
 use crate::cli::Cli;
-
-mod cli;
 
 fn main() {
     env_logger::init();
 
     let cli = Cli::parse();
 
-    trace!("{:?}", cli)
+    trace!("{:?}", cli);
+
+    let config = Config::read();
+
+    trace!("{:?}", config);
 }
