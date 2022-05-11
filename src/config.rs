@@ -16,21 +16,32 @@ pub struct Config {
     pub sync_command: String,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum ConfigError {
+    #[error("Could not find configuration directory")]
+    GetDirectory,
+    #[error("Error reading configuration file: {0}")]
+    ReadFile(#[from] io::Error),
+    #[error("Error in configuration file: {0}")]
+    WrongConfig(#[from] toml::de::Error),
+    #[error("Couldn't find editor in config and EDITOR variable is not set")]
+    MissingEditor,
+}
+
 impl Config {
-    pub fn read() -> io::Result<Self> {
-        let mut config_dir = dirs::config_dir().expect("Couldn't find configuration directory");
+    pub fn read() -> Result<Self, ConfigError> {
+        let mut config_dir = dirs::config_dir().ok_or_else(|| ConfigError::GetDirectory)?;
 
         config_dir.push("note");
         config_dir.push("config.toml");
 
-        let file = fs::read_to_string(config_dir).expect("Couldn't read file");
+        let file = fs::read_to_string(config_dir).map_err(|err| ConfigError::from(err))?;
 
-        let config: ConfigFile = toml::from_str(&file).expect("Error in config");
+        let config: ConfigFile = toml::from_str(&file).map_err(|err| ConfigError::from(err))?;
 
         let editor = match config.editor {
             Some(editor) => editor,
-            None => env::var("EDITOR")
-                .expect("Couldn't find editor in config and EDITOR variable is not set"),
+            None => env::var("EDITOR").map_err(|_| ConfigError::MissingEditor)?,
         };
 
         Ok(Self {

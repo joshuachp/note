@@ -3,7 +3,7 @@ mod config;
 
 use clap::Parser;
 use config::Config;
-use log::trace;
+use log::{error, trace};
 
 use crate::cli::Cli;
 
@@ -14,7 +14,13 @@ fn main() {
 
     trace!("{:?}", cli);
 
-    let config = Config::read();
+    let config = match Config::read() {
+        Ok(config) => config,
+        Err(err) => {
+            error!("{}", err);
+            panic!();
+        }
+    };
 
     trace!("{:?}", config);
 }
