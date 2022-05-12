@@ -7,7 +7,7 @@ use config::Config;
 use log::{error, trace};
 
 use crate::{
-    cli::{Cli, Command},
+    cli::{generate_completion, Cli, Command},
     edit::edit_note,
 };
 
@@ -29,8 +29,8 @@ fn main() {
     trace!("{:?}", config);
 
     match cli.command {
-        Command::Edit { path } | Command::E { path } => {
-            if let Err(err) = edit_note(&config, &path) {
+        Command::Edit(edit) => {
+            if let Err(err) = edit_note(&config, &edit.path) {
                 error!("Error: {}", err);
                 panic!();
             }
@@ -45,6 +45,6 @@ fn main() {
         Command::Search { content: _ } => todo!(),
         Command::Find { filename: _ } => todo!(),
         Command::Sync => todo!(),
-        Command::Completion { shell: _ } => todo!(),
+        Command::Completion { shell } => generate_completion(shell),
     }
 }
