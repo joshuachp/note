@@ -37,7 +37,16 @@
           inherit (fenix.packages.${system}.stable) cargo rustc;
         })
         .buildPackage {
+          buildInputs = with pkgs; [installShellFiles];
           root = ./.;
+          overrideMain = _: {
+            postInstall = ''
+              installShellCompletion --cmd note \
+                --bash <($out/bin/note completion bash) \
+                --fish <($out/bin/note completion fish) \
+                --zsh <($out/bin/note completion zsh)
+            '';
+          };
         };
 
       app.default = flake-utils.lib.mkApp {
