@@ -18,13 +18,13 @@ pub struct Config {
 
 #[derive(thiserror::Error, Debug)]
 pub enum ConfigError {
-    #[error("Could not find configuration directory")]
+    #[error("could not find configuration directory")]
     GetDirectory,
-    #[error("Error reading configuration file: {0}")]
+    #[error("error reading configuration file: {0}")]
     ReadFile(#[from] io::Error),
-    #[error("Error in configuration file: {0}")]
+    #[error("invalid configuration file: {0}")]
     WrongConfig(#[from] toml::de::Error),
-    #[error("Couldn't find editor in config and EDITOR variable is not set")]
+    #[error("couldn't find editor in config and EDITOR variable is not set")]
     MissingEditor,
 }
 

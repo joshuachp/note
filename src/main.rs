@@ -21,7 +21,7 @@ fn main() {
     let config = match Config::read() {
         Ok(config) => config,
         Err(err) => {
-            error!("{}", err);
+            error!("Error: {}", err);
             panic!();
         }
     };
@@ -29,9 +29,19 @@ fn main() {
     trace!("{:?}", config);
 
     match cli.command {
-        Command::Edit { path } | Command::E { path } => edit_note(&config, &path),
+        Command::Edit { path } | Command::E { path } => {
+            if let Err(err) = edit_note(&config, &path) {
+                error!("Error: {}", err);
+                panic!();
+            }
+        }
         Command::Journal => todo!(),
-        Command::Todo => edit_note(&config, "todo"),
+        Command::Todo => {
+            if let Err(err) = edit_note(&config, "todo") {
+                error!("Error: {}", err);
+                panic!();
+            }
+        }
         Command::Search { content: _ } => todo!(),
         Command::Find { filename: _ } => todo!(),
         Command::Sync => todo!(),
