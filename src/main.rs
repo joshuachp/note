@@ -29,22 +29,30 @@ fn main() {
     trace!("{:?}", config);
 
     match cli.command {
-        Command::Edit(edit) => {
-            if let Err(err) = edit_note(&config, &edit.path) {
+        Some(command) => match command {
+            Command::Edit(edit) => {
+                if let Err(err) = edit_note(&config, &edit.path) {
+                    error!("Error: {}", err);
+                    panic!();
+                }
+            }
+            Command::Journal => todo!(),
+            Command::Todo => {
+                if let Err(err) = edit_note(&config, "todo") {
+                    error!("Error: {}", err);
+                    panic!();
+                }
+            }
+            Command::Search { content: _ } => todo!(),
+            Command::Find { filename: _ } => todo!(),
+            Command::Sync => todo!(),
+            Command::Completion { shell } => generate_completion(shell),
+        },
+        None => {
+            if let Err(err) = edit_note(&config, "inbox") {
                 error!("Error: {}", err);
                 panic!();
             }
         }
-        Command::Journal => todo!(),
-        Command::Todo => {
-            if let Err(err) = edit_note(&config, "todo") {
-                error!("Error: {}", err);
-                panic!();
-            }
-        }
-        Command::Search { content: _ } => todo!(),
-        Command::Find { filename: _ } => todo!(),
-        Command::Sync => todo!(),
-        Command::Completion { shell } => generate_completion(shell),
     }
 }

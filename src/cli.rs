@@ -10,7 +10,7 @@ use clap_complete::generate;
 pub struct Cli {
     /// General sub commands
     #[clap(subcommand)]
-    pub command: Command,
+    pub command: Option<Command>,
 }
 
 #[derive(Debug, Args)]
