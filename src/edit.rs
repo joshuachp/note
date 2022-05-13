@@ -1,5 +1,6 @@
+use chrono::{Local, NaiveDate};
 use log::trace;
-use std::{fs, io, path::PathBuf, process::Command};
+use std::{fs, io, path::PathBuf, process::Command, str::FromStr};
 
 use crate::config::Config;
 
@@ -9,10 +10,12 @@ pub enum EditError {
     ParentDir(io::Error),
     #[error("path is not a file")]
     NotFile,
-    #[error("Foo bar")]
+    #[error("failed to spawn editor")]
     Spawn(io::Error),
-    #[error("")]
+    #[error("failed to wait editor process")]
     Wait(io::Error),
+    #[error("invalid date: {0}")]
+    Date(chrono::ParseError),
 }
 
 fn get_path(base_path: &str, path: &str) -> PathBuf {
@@ -81,4 +84,17 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
     }
 
     Ok(())
+}
+
+pub fn edit_journal(config: &Config, date: Option<&str>) -> Result<(), EditError> {
+    let date = match date {
+        Some(date) => NaiveDate::from_str(date).map_err(|err| EditError::Date(err))?,
+        None => Local::today().naive_local(),
+    };
+
+    let mut entry = PathBuf::from("journal");
+    entry.push(date.to_string());
+    entry.set_extension("md");
+
+    edit_note(config, &entry.to_string_lossy())
 }

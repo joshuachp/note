@@ -8,7 +8,7 @@ use log::{error, trace};
 
 use crate::{
     cli::{generate_completion, Cli, Command},
-    edit::edit_note,
+    edit::{edit_journal, edit_note},
 };
 
 fn main() {
@@ -36,7 +36,12 @@ fn main() {
                     panic!();
                 }
             }
-            Command::Journal => todo!(),
+            Command::Journal { date } => {
+                if let Err(err) = edit_journal(&config, date.as_deref()) {
+                    error!("Error: {}", err);
+                    panic!();
+                }
+            }
             Command::Todo => {
                 if let Err(err) = edit_note(&config, "todo") {
                     error!("Error: {}", err);

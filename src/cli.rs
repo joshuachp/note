@@ -28,7 +28,10 @@ pub enum Command {
     Edit(Edit),
     /// Opens the daily journal
     #[clap(visible_alias("j"))]
-    Journal,
+    Journal {
+        /// Journal entry to edit, in the Y-m-d format
+        date: Option<String>,
+    },
     /// Opens the todo file
     #[clap(visible_alias("t"))]
     Todo,
