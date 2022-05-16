@@ -10,9 +10,9 @@ pub enum EditError {
     ParentDir(io::Error),
     #[error("path is not a file")]
     NotFile,
-    #[error("failed to spawn editor")]
+    #[error("failed to spawn editor: {0}")]
     Spawn(io::Error),
-    #[error("failed to wait editor process")]
+    #[error("failed to wait editor process: {0}")]
     Wait(io::Error),
     #[error("invalid date: {0}")]
     Date(chrono::ParseError),

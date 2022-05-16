@@ -1,6 +1,7 @@
 mod cli;
 mod config;
 mod edit;
+mod search;
 mod sync;
 
 use clap::Parser;
@@ -10,6 +11,7 @@ use log::{error, trace};
 use crate::{
     cli::{generate_completion, Cli, Command},
     edit::{edit_journal, edit_note},
+    search::{find_file, search_content},
     sync::sync_files,
 };
 
@@ -55,8 +57,18 @@ fn main() {
                     panic!();
                 }
             }
-            Command::Search { content: _ } => todo!(),
-            Command::Find { filename: _ } => todo!(),
+            Command::Search { content } => {
+                if let Err(err) = search_content(&config, &content) {
+                    error!("Error: {}", err);
+                    panic!();
+                }
+            }
+            Command::Find { filename } => {
+                if let Err(err) = find_file(&config, &filename) {
+                    error!("Error: {}", err);
+                    panic!();
+                }
+            }
             Command::Sync => {
                 if let Err(err) = sync_files(&config) {
                     error!("Error: {}", err);

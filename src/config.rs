@@ -4,16 +4,22 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
+    shell: Option<String>,
     editor: Option<String>,
-    note_path: String,
+    note_path: Option<String>,
     sync_command: String,
+    find_command: String,
+    search_command: String,
 }
 
 #[derive(Debug)]
 pub struct Config {
+    pub shell: String,
     pub editor: String,
     pub note_path: String,
     pub sync_command: String,
+    pub find_command: String,
+    pub search_command: String,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -24,8 +30,12 @@ pub enum ConfigError {
     ReadFile(#[from] io::Error),
     #[error("invalid configuration file: {0}")]
     WrongConfig(#[from] toml::de::Error),
-    #[error("couldn't find editor in config and EDITOR variable is not set")]
-    MissingEditor,
+    #[error("no shell set in configuration and could not read SHELL env variable: {0}")]
+    MissingShell(env::VarError),
+    #[error("no editor set in configuration and could not read EDITOR env variable: {0}")]
+    MissingEditor(env::VarError),
+    #[error("no note path set in configuration and could not read NOTE_PATH env variable: {0}")]
+    MissingNotePath(env::VarError),
 }
 
 impl Config {
@@ -39,15 +49,28 @@ impl Config {
 
         let config: ConfigFile = toml::from_str(&file).map_err(|err| ConfigError::from(err))?;
 
+        let shell = match config.shell {
+            Some(shell) => shell,
+            None => env::var("SHELL").map_err(|err| ConfigError::MissingShell(err))?,
+        };
+
         let editor = match config.editor {
             Some(editor) => editor,
-            None => env::var("EDITOR").map_err(|_| ConfigError::MissingEditor)?,
+            None => env::var("EDITOR").map_err(|err| ConfigError::MissingEditor(err))?,
+        };
+
+        let note_path = match config.note_path {
+            Some(note_path) => note_path,
+            None => env::var("NOTE_PATH").map_err(|err| ConfigError::MissingNotePath(err))?,
         };
 
         Ok(Self {
+            shell,
             editor,
-            note_path: config.note_path,
+            note_path,
             sync_command: config.sync_command,
+            find_command: config.find_command,
+            search_command: config.search_command,
         })
     }
 }
