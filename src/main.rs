@@ -20,6 +20,11 @@ fn main() {
 
     trace!("{:?}", cli);
 
+    if let Some(Command::Completion { shell }) = cli.command {
+        generate_completion(shell);
+        return;
+    }
+
     let config = match Config::read() {
         Ok(config) => config,
         Err(err) => {
@@ -58,7 +63,7 @@ fn main() {
                     panic!();
                 }
             }
-            Command::Completion { shell } => generate_completion(shell),
+            Command::Completion { .. } => unreachable!("should have returned before"),
         },
         None => {
             if let Err(err) = edit_note(&config, "inbox") {

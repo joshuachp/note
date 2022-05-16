@@ -37,7 +37,7 @@
           inherit (fenix.packages.${system}.stable) cargo rustc;
         })
         .buildPackage {
-          buildInputs = with pkgs; [installShellFiles];
+          nativeBuildInputs = with pkgs; [installShellFiles];
           root = ./.;
           overrideMain = _: {
             postInstall = ''
