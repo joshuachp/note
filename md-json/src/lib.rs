@@ -3,18 +3,23 @@ mod parser;
 
 use std::{collections::HashMap, ffi::OsStr, fs};
 
+use log::trace;
 use walkdir::WalkDir;
 
 use crate::error::Error;
 use crate::parser::{parse, Markdown};
 
 pub fn md_to_json(path: &str) -> Result<String, Error> {
+    trace!("{}", path);
+
     let mut files: HashMap<String, String> = HashMap::new();
 
     WalkDir::new(path)
         .into_iter()
         .filter_map(|entry| entry.ok())
         .filter_map(|entry| {
+            trace!("{:?}", &entry);
+
             let path = entry.path();
 
             if path.is_file() && path.extension() == Some(OsStr::new("md")) {
@@ -26,7 +31,9 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
         .try_fold(
             &mut files,
             |files, file| -> Result<&mut HashMap<String, String>, Error> {
-                let content = fs::read_to_string(&file).map_err(|err| Error::File(err))?;
+                let content = fs::read_to_string(&file).map_err(Error::File)?;
+
+                trace!("{}", content);
 
                 files.insert(file, content);
 
@@ -48,5 +55,5 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
         )
         .expect("Error parsing markdown");
 
-    serde_json::to_string(&markdown_files).map_err(|err| Error::ToJson(err))
+    serde_json::to_string(&markdown_files).map_err(Error::ToJson)
 }

@@ -27,9 +27,9 @@ pub enum ConfigError {
     #[error("could not find configuration directory")]
     GetDirectory,
     #[error("error reading configuration file: {0}")]
-    ReadFile(#[from] io::Error),
+    ReadFile(io::Error),
     #[error("invalid configuration file: {0}")]
-    WrongConfig(#[from] toml::de::Error),
+    WrongConfig(toml::de::Error),
     #[error("no shell set in configuration and could not read SHELL env variable: {0}")]
     MissingShell(env::VarError),
     #[error("no editor set in configuration and could not read EDITOR env variable: {0}")]
@@ -40,28 +40,28 @@ pub enum ConfigError {
 
 impl Config {
     pub fn read() -> Result<Self, ConfigError> {
-        let mut config_dir = dirs::config_dir().ok_or_else(|| ConfigError::GetDirectory)?;
+        let mut config_dir = dirs::config_dir().ok_or(ConfigError::GetDirectory)?;
 
         config_dir.push("note");
         config_dir.push("config.toml");
 
-        let file = fs::read_to_string(config_dir).map_err(|err| ConfigError::from(err))?;
+        let file = fs::read_to_string(config_dir).map_err(ConfigError::ReadFile)?;
 
-        let config: ConfigFile = toml::from_str(&file).map_err(|err| ConfigError::from(err))?;
+        let config: ConfigFile = toml::from_str(&file).map_err(ConfigError::WrongConfig)?;
 
         let shell = match config.shell {
             Some(shell) => shell,
-            None => env::var("SHELL").map_err(|err| ConfigError::MissingShell(err))?,
+            None => env::var("SHELL").map_err(ConfigError::MissingShell)?,
         };
 
         let editor = match config.editor {
             Some(editor) => editor,
-            None => env::var("EDITOR").map_err(|err| ConfigError::MissingEditor(err))?,
+            None => env::var("EDITOR").map_err(ConfigError::MissingEditor)?,
         };
 
         let note_path = match config.note_path {
             Some(note_path) => note_path,
-            None => env::var("NOTE_PATH").map_err(|err| ConfigError::MissingNotePath(err))?,
+            None => env::var("NOTE_PATH").map_err(ConfigError::MissingNotePath)?,
         };
 
         Ok(Self {

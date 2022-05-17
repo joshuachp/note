@@ -15,9 +15,9 @@ pub enum SyncError {
 pub fn sync_files(config: &Config) -> Result<(), SyncError> {
     let res = Command::new(&config.sync_command)
         .spawn()
-        .map_err(|err| SyncError::Spawn(err))?
+        .map_err(SyncError::Spawn)?
         .wait()
-        .map_err(|err| SyncError::Wait(err))?;
+        .map_err(SyncError::Wait)?;
 
     if !res.success() {
         return Err(SyncError::Result);

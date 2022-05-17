@@ -53,7 +53,7 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
         if !parent.is_dir() {
             trace!("Creating parent directory: {parent:?}");
 
-            fs::create_dir_all(parent).map_err(|err| EditError::ParentDir(err))?;
+            fs::create_dir_all(parent).map_err(EditError::ParentDir)?;
         }
     }
 
@@ -73,9 +73,9 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
     let res = Command::new(&config.editor)
         .args([&file_path])
         .spawn()
-        .map_err(|err| EditError::Spawn(err))?
+        .map_err(EditError::Spawn)?
         .wait()
-        .map_err(|err| EditError::Wait(err))?;
+        .map_err(EditError::Wait)?;
 
     trace!("Result {}", res);
 
@@ -88,7 +88,7 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
 
 pub fn edit_journal(config: &Config, date: Option<&str>) -> Result<(), EditError> {
     let date = match date {
-        Some(date) => NaiveDate::from_str(date).map_err(|err| EditError::Date(err))?,
+        Some(date) => NaiveDate::from_str(date).map_err(EditError::Date)?,
         None => Local::today().naive_local(),
     };
 

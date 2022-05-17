@@ -36,11 +36,11 @@ fn front_matter_parser(markdown: &str) -> IResult<&str, &str> {
     )(markdown)
 }
 
-pub fn front_matter<'a>(markdown: &'a str) -> Result<Option<FrontMatter>, Error> {
+pub fn front_matter(markdown: &str) -> Result<Option<FrontMatter>, Error> {
     match front_matter_parser(markdown) {
         Ok((_, yaml)) => {
             let front_matter: FrontMatter =
-                serde_yaml::from_str(yaml).map_err(|err| Error::FrontMatter(err))?;
+                serde_yaml::from_str(yaml).map_err(Error::FrontMatter)?;
 
             Ok(Some(front_matter))
         }

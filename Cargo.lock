@@ -228,6 +228,8 @@ dependencies = [
 name = "md-json"
 version = "0.1.0"
 dependencies = [
+ "env_logger",
+ "log",
  "nom",
  "pulldown-cmark",
  "serde",

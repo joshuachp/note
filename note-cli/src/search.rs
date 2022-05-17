@@ -29,21 +29,21 @@ pub fn shell_cmd(config: &Config, cmd: &str, search: &str) -> Result<String, Sea
         .args(["-c", cmd])
         .stdout(Stdio::piped())
         .spawn()
-        .map_err(|err| SearchError::Exec(err))?
+        .map_err(SearchError::Exec)?
         .wait_with_output()
-        .map_err(|err| SearchError::Exec(err))?;
+        .map_err(SearchError::Exec)?;
 
     debug!("status: {}", &output.status);
     debug!("stdout: {:?}", &output.stdout);
     debug!("stderr: {:?}", &output.stderr);
 
     if !output.status.success() {
-        let stderr = String::from_utf8(output.stderr).map_err(|err| SearchError::Utf8(err))?;
+        let stderr = String::from_utf8(output.stderr).map_err(SearchError::Utf8)?;
 
         return Err(SearchError::Status(stderr));
     }
 
-    let result = String::from_utf8(output.stdout).map_err(|err| SearchError::Utf8(err))?;
+    let result = String::from_utf8(output.stdout).map_err(SearchError::Utf8)?;
 
     Ok(result)
 }
@@ -53,7 +53,7 @@ pub fn find_file(config: &Config, file: &str) -> Result<(), SearchError> {
 
     trace!("{}", output);
 
-    edit_note(config, output.trim()).map_err(|err| SearchError::Edit(err))
+    edit_note(config, output.trim()).map_err(SearchError::Edit)
 }
 
 pub fn search_content(config: &Config, search: &str) -> Result<(), SearchError> {
@@ -61,5 +61,5 @@ pub fn search_content(config: &Config, search: &str) -> Result<(), SearchError> 
 
     trace!("{}", output);
 
-    edit_note(config, output.trim()).map_err(|err| SearchError::Edit(err))
+    edit_note(config, output.trim()).map_err(SearchError::Edit)
 }

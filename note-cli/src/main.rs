@@ -59,14 +59,14 @@ fn main() {
                 }
             }
             Command::Search { content } => {
-                let content = content.as_deref().unwrap_or_else(|| "");
+                let content = content.as_deref().unwrap_or("");
                 if let Err(err) = search_content(&config, content) {
                     error!("Error: {}", err);
                     panic!();
                 }
             }
             Command::Find { filename } => {
-                let content = filename.as_deref().unwrap_or_else(|| "");
+                let content = filename.as_deref().unwrap_or("");
                 if let Err(err) = find_file(&config, content) {
                     error!("Error: {}", err);
                     panic!();
