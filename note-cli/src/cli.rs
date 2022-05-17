@@ -54,6 +54,11 @@ pub enum Command {
         #[clap(arg_enum)]
         shell: Shell,
     },
+    /// Compiles notes to JSON
+    Compile {
+        #[clap(value_hint(ValueHint::AnyPath))]
+        path: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy, ArgEnum)]

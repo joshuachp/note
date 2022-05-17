@@ -17,3 +17,6 @@ log = "0.4"
 serde = { version = "1.0", features = [ "derive" ] }
 thiserror = "1.0"
 toml = "0.5"
+
+[dependencies.md-json]
+path = "../md-json"

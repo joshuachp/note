@@ -7,6 +7,7 @@ mod sync;
 use clap::Parser;
 use config::Config;
 use log::{error, trace};
+use md_json::md_to_json;
 
 use crate::{
     cli::{generate_completion, Cli, Command},
@@ -77,6 +78,13 @@ fn main() {
                     panic!();
                 }
             }
+            Command::Compile { path } => match md_to_json(&path) {
+                Err(err) => {
+                    error!("Error: {}", err);
+                    panic!();
+                }
+                Ok(json) => println!("{}", json),
+            },
             Command::Completion { .. } => unreachable!("should have returned before"),
         },
         None => {

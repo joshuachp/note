@@ -58,7 +58,12 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
         tags,
         description,
         language,
-    } = front_matter(markdown)?.unwrap();
+    } = front_matter(markdown)?.unwrap_or_else(|| FrontMatter {
+        title: String::from(""),
+        tags: Vec::new(),
+        description: None,
+        language: None,
+    });
 
     Ok(Markdown {
         title,
