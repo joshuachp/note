@@ -1,0 +1,19 @@
+[package]
+name = "note-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "note"
+path = "src/main.rs"
+
+[dependencies]
+chrono = "0.4"
+clap = { version = "3.1", features = [ "derive" ] }
+clap_complete = "3.1"
+dirs = "4.0"
+env_logger = "0.9"
+log = "0.4"
+serde = { version = "1.0", features = [ "derive" ] }
+thiserror = "1.0"
+toml = "0.5"
