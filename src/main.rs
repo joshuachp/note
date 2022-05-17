@@ -58,13 +58,15 @@ fn main() {
                 }
             }
             Command::Search { content } => {
-                if let Err(err) = search_content(&config, &content) {
+                let content = content.as_deref().unwrap_or_else(|| "");
+                if let Err(err) = search_content(&config, content) {
                     error!("Error: {}", err);
                     panic!();
                 }
             }
             Command::Find { filename } => {
-                if let Err(err) = find_file(&config, &filename) {
+                let content = filename.as_deref().unwrap_or_else(|| "");
+                if let Err(err) = find_file(&config, content) {
                     error!("Error: {}", err);
                     panic!();
                 }

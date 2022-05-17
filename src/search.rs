@@ -3,9 +3,12 @@ use std::{
     process::{Command, Stdio},
 };
 
-use log::debug;
+use log::{debug, trace};
 
-use crate::config::Config;
+use crate::{
+    config::Config,
+    edit::{edit_note, EditError},
+};
 
 #[derive(Debug, thiserror::Error)]
 pub enum SearchError {
@@ -15,12 +18,14 @@ pub enum SearchError {
     Status(String),
     #[error("invalid UTF8 output: {0}")]
     Utf8(std::string::FromUtf8Error),
+    #[error("failed to edit note: {0}")]
+    Edit(EditError),
 }
 
 pub fn shell_cmd(config: &Config, cmd: &str, search: &str) -> Result<String, SearchError> {
     let output = Command::new(&config.shell)
         .current_dir(&config.note_path)
-        .env("search", search)
+        .env("SEARCH", search)
         .args(["-c", cmd])
         .stdout(Stdio::piped())
         .spawn()
@@ -46,15 +51,15 @@ pub fn shell_cmd(config: &Config, cmd: &str, search: &str) -> Result<String, Sea
 pub fn find_file(config: &Config, file: &str) -> Result<(), SearchError> {
     let output = shell_cmd(config, &config.find_command, file)?;
 
-    dbg!(output);
+    trace!("{}", output);
 
-    Ok(())
+    edit_note(config, output.trim()).map_err(|err| SearchError::Edit(err))
 }
 
 pub fn search_content(config: &Config, search: &str) -> Result<(), SearchError> {
     let output = shell_cmd(config, &config.search_command, search)?;
 
-    dbg!(output);
+    trace!("{}", output);
 
-    Ok(())
+    edit_note(config, output.trim()).map_err(|err| SearchError::Edit(err))
 }

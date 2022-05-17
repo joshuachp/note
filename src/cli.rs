@@ -39,13 +39,13 @@ pub enum Command {
     #[clap(visible_alias("s"))]
     Search {
         /// Content
-        content: String,
+        content: Option<String>,
     },
     /// Search the name of the files
     #[clap(visible_alias("f"))]
     Find {
         /// Filename
-        filename: String,
+        filename: Option<String>,
     },
     /// Sync the notes using the configured sync command
     Sync,
