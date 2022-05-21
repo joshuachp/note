@@ -2,6 +2,8 @@ use std::io;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("missing front matter")]
+    MissingFrontMatter,
     #[error("invalid yaml front matter: {0}")]
     FrontMatter(serde_yaml::Error),
     #[error("impossible to read the file: {0}")]

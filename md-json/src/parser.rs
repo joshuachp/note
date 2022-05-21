@@ -15,7 +15,7 @@ use crate::error::Error;
 pub struct Markdown<'a> {
     title: String,
     tags: Vec<String>,
-    description: Option<String>,
+    description: String,
     language: Option<String>,
     content: Vec<Event<'a>>,
 }
@@ -24,7 +24,7 @@ pub struct Markdown<'a> {
 pub struct FrontMatter {
     title: String,
     tags: Vec<String>,
-    description: Option<String>,
+    description: String,
     language: Option<String>,
 }
 
@@ -36,15 +36,14 @@ fn front_matter_parser(markdown: &str) -> IResult<&str, &str> {
     )(markdown)
 }
 
-pub fn front_matter(markdown: &str) -> Result<Option<FrontMatter>, Error> {
+pub fn front_matter(markdown: &str) -> Result<FrontMatter, Error> {
     match front_matter_parser(markdown) {
         Ok((_, yaml)) => {
             let front_matter: FrontMatter =
                 serde_yaml::from_str(yaml).map_err(Error::FrontMatter)?;
-
-            Ok(Some(front_matter))
+            Ok(front_matter)
         }
-        Err(_) => Ok(None),
+        Err(_) => Err(Error::MissingFrontMatter),
     }
 }
 
@@ -52,18 +51,12 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
     let options = Options::all();
     let parser = Parser::new_ext(markdown, options);
 
-    // TODO: handle None case
     let FrontMatter {
         title,
         tags,
         description,
         language,
-    } = front_matter(markdown)?.unwrap_or_else(|| FrontMatter {
-        title: String::from(""),
-        tags: Vec::new(),
-        description: None,
-        language: None,
-    });
+    } = front_matter(markdown)?;
 
     Ok(Markdown {
         title,
