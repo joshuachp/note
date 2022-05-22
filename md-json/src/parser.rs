@@ -15,7 +15,7 @@ use crate::error::Error;
 pub struct Markdown<'a> {
     title: String,
     tags: Vec<String>,
-    description: String,
+    description: Option<String>,
     language: Option<String>,
     content: Vec<Event<'a>>,
 }
@@ -24,7 +24,7 @@ pub struct Markdown<'a> {
 pub struct FrontMatter {
     title: String,
     tags: Vec<String>,
-    description: String,
+    description: Option<String>,
     language: Option<String>,
 }
 
