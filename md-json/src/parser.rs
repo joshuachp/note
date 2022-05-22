@@ -36,27 +36,29 @@ fn front_matter_parser(markdown: &str) -> IResult<&str, &str> {
     )(markdown)
 }
 
-pub fn front_matter(markdown: &str) -> Result<FrontMatter, Error> {
+pub fn front_matter(markdown: &str) -> Result<(FrontMatter, &str), Error> {
     match front_matter_parser(markdown) {
-        Ok((_, yaml)) => {
+        Ok((rest, yaml)) => {
             let front_matter: FrontMatter =
                 serde_yaml::from_str(yaml).map_err(Error::FrontMatter)?;
-            Ok(front_matter)
+            Ok((front_matter, rest))
         }
         Err(_) => Err(Error::MissingFrontMatter),
     }
 }
 
 pub fn parse(markdown: &str) -> Result<Markdown, Error> {
-    let options = Options::all();
-    let parser = Parser::new_ext(markdown, options);
+    let (metadata, content) = front_matter(markdown)?;
 
     let FrontMatter {
         title,
         tags,
         description,
         language,
-    } = front_matter(markdown)?;
+    } = metadata;
+
+    let options = Options::all();
+    let parser = Parser::new_ext(content, options);
 
     Ok(Markdown {
         title,
