@@ -23,16 +23,20 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
             let path = entry.path();
 
             if path.is_file() && path.extension() == Some(OsStr::new("md")) {
-                Some(path.to_string_lossy().to_string())
+                Some(entry)
             } else {
                 None
             }
         })
         .try_fold(
             &mut files,
-            |files, file| -> Result<&mut HashMap<String, String>, Error> {
-                let content = fs::read_to_string(&file).map_err(Error::File)?;
+            |files, entry| -> Result<&mut HashMap<String, String>, Error> {
+                let path = entry.path();
 
+                let content = fs::read_to_string(&path).map_err(Error::File)?;
+                let file = path.file_stem().unwrap().to_string_lossy().to_string();
+
+                trace!("{}", file);
                 trace!("{}", content);
 
                 files.insert(file, content);
