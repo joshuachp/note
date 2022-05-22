@@ -17,16 +17,13 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
     WalkDir::new(path)
         .into_iter()
         .filter_map(|entry| entry.ok())
-        .filter_map(|entry| {
+        .filter(|entry| {
             trace!("{:?}", &entry);
 
             let path = entry.path();
 
-            if path.is_file() && path.extension() == Some(OsStr::new("md")) {
-                Some(entry)
-            } else {
-                None
-            }
+            // Filter for markdown files
+            path.is_file() && (path.extension() == Some(OsStr::new("md")))
         })
         .try_fold(
             &mut files,
