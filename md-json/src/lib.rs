@@ -10,7 +10,7 @@ use walkdir::WalkDir;
 use crate::error::Error;
 use crate::parser::{parse, Markdown};
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug)]
 struct File {
     file: String,
     content: String,
@@ -50,7 +50,6 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
         )
         .expect("Error reading files");
 
-    files.sort();
     trace!("{:?}", files);
 
     let mut markdown_files: IndexMap<&str, Markdown> = IndexMap::new();
@@ -66,6 +65,12 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
             },
         )
         .expect("Error parsing markdown");
+
+    trace!("{:?}", markdown_files);
+
+    markdown_files.sort_by(|_, first, _, second| first.date.cmp(&second.date).reverse());
+
+    trace!("sorted: {:?}", markdown_files);
 
     serde_json::to_string(&markdown_files).map_err(Error::ToJson)
 }

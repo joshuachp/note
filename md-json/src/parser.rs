@@ -14,12 +14,12 @@ use crate::error::Error;
 
 #[derive(Serialize, Debug)]
 pub struct Markdown<'a> {
-    title: String,
-    tags: Vec<String>,
-    date: NaiveDate,
-    description: Option<String>,
-    language: Option<String>,
-    content: Vec<Event<'a>>,
+    pub title: String,
+    pub tags: Vec<String>,
+    pub date: NaiveDate,
+    pub description: Option<String>,
+    pub language: Option<String>,
+    pub content: Vec<Event<'a>>,
 }
 
 #[derive(Deserialize, Debug)]
