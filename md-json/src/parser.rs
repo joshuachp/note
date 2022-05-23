@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
@@ -15,6 +16,7 @@ use crate::error::Error;
 pub struct Markdown<'a> {
     title: String,
     tags: Vec<String>,
+    date: NaiveDate,
     description: Option<String>,
     language: Option<String>,
     content: Vec<Event<'a>>,
@@ -24,6 +26,7 @@ pub struct Markdown<'a> {
 pub struct FrontMatter {
     title: String,
     tags: Vec<String>,
+    date: String,
     description: Option<String>,
     language: Option<String>,
 }
@@ -53,9 +56,12 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
     let FrontMatter {
         title,
         tags,
+        date,
         description,
         language,
     } = metadata;
+
+    let date = NaiveDate::parse_from_str(&date, "%Y-%m-%d").map_err(Error::Date)?;
 
     let options = Options::all();
     let parser = Parser::new_ext(content, options);
@@ -63,6 +69,7 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
     Ok(Markdown {
         title,
         tags,
+        date,
         description,
         language,
         content: parser.collect(),

@@ -10,4 +10,6 @@ pub enum Error {
     File(io::Error),
     #[error("failed to serialize to json: {0}")]
     ToJson(serde_json::Error),
+    #[error("invalid date format: {0}")]
+    Date(chrono::format::ParseError),
 }

@@ -49,6 +49,7 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
+ "serde",
  "time",
  "winapi",
 ]
@@ -228,6 +229,7 @@ dependencies = [
 name = "md-json"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "env_logger",
  "log",
  "nom",
