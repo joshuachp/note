@@ -1,18 +1,25 @@
 mod error;
 mod parser;
 
-use std::{collections::HashMap, ffi::OsStr, fs};
+use std::{ffi::OsStr, fs};
 
+use indexmap::IndexMap;
 use log::trace;
 use walkdir::WalkDir;
 
 use crate::error::Error;
 use crate::parser::{parse, Markdown};
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+struct File {
+    file: String,
+    content: String,
+}
+
 pub fn md_to_json(path: &str) -> Result<String, Error> {
     trace!("{}", path);
 
-    let mut files: HashMap<String, String> = HashMap::new();
+    let mut files: Vec<File> = Vec::new();
 
     WalkDir::new(path)
         .into_iter()
@@ -27,7 +34,7 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
         })
         .try_fold(
             &mut files,
-            |files, entry| -> Result<&mut HashMap<String, String>, Error> {
+            |files, entry| -> Result<&mut Vec<File>, Error> {
                 let path = entry.path();
 
                 let content = fs::read_to_string(&path).map_err(Error::File)?;
@@ -36,20 +43,24 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
                 trace!("{}", file);
                 trace!("{}", content);
 
-                files.insert(file, content);
+                files.push(File { file, content });
 
                 Ok(files)
             },
         )
         .expect("Error reading files");
 
-    let mut markdown_files: HashMap<&str, Markdown> = HashMap::new();
+    files.sort();
+    trace!("{:?}", files);
+
+    let mut markdown_files: IndexMap<&str, Markdown> = IndexMap::new();
 
     files
         .iter()
         .try_fold(
             &mut markdown_files,
-            |markdown_files, (file, content)| -> Result<&mut HashMap<&str, Markdown>, Error> {
+            |markdown_files, file_content| -> Result<&mut IndexMap<&str, Markdown>, Error> {
+                let File { file, content } = file_content;
                 markdown_files.insert(file, parse(content)?);
                 Ok(markdown_files)
             },
