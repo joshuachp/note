@@ -78,7 +78,7 @@ fn main() {
                     panic!();
                 }
             }
-            Command::Compile { path } => match md_to_json(&path) {
+            Command::Compile { path, drafts } => match md_to_json(&path, !drafts) {
                 Err(err) => {
                     error!("Error: {}", err);
                     panic!();

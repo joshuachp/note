@@ -58,6 +58,10 @@ pub enum Command {
     Compile {
         #[clap(value_hint(ValueHint::AnyPath))]
         path: String,
+
+        /// Include drafts in the compiled JSON
+        #[clap(long = "draft")]
+        drafts: bool,
     },
 }
 

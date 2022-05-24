@@ -16,7 +16,7 @@ struct File {
     content: String,
 }
 
-pub fn md_to_json(path: &str) -> Result<String, Error> {
+pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
     trace!("{}", path);
 
     let mut files: Vec<File> = Vec::new();
@@ -64,7 +64,7 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
                 let markdown = parse(content)?;
 
                 // Skip drafts
-                if markdown.draft {
+                if skip_drafts && markdown.draft {
                     return Ok(markdown_files);
                 }
 
