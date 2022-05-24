@@ -15,9 +15,10 @@ use crate::error::Error;
 #[derive(Serialize, Debug)]
 pub struct Markdown<'a> {
     pub title: String,
+    pub description: Option<String>,
     pub tags: Vec<String>,
     pub date: NaiveDate,
-    pub description: Option<String>,
+    pub draft: bool,
     pub language: Option<String>,
     pub content: Vec<Event<'a>>,
 }
@@ -25,9 +26,10 @@ pub struct Markdown<'a> {
 #[derive(Deserialize, Debug)]
 pub struct FrontMatter {
     title: String,
+    description: Option<String>,
     tags: Vec<String>,
     date: String,
-    description: Option<String>,
+    draft: Option<bool>,
     language: Option<String>,
 }
 
@@ -55,9 +57,10 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
 
     let FrontMatter {
         title,
+        description,
         tags,
         date,
-        description,
+        draft,
         language,
     } = metadata;
 
@@ -68,9 +71,10 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
 
     Ok(Markdown {
         title,
+        description,
         tags,
         date,
-        description,
+        draft: draft.unwrap_or(false),
         language,
         content: parser.collect(),
     })

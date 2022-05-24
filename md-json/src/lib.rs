@@ -60,7 +60,16 @@ pub fn md_to_json(path: &str) -> Result<String, Error> {
             &mut markdown_files,
             |markdown_files, file_content| -> Result<&mut IndexMap<&str, Markdown>, Error> {
                 let File { file, content } = file_content;
-                markdown_files.insert(file, parse(content)?);
+
+                let markdown = parse(content)?;
+
+                // Skip drafts
+                if markdown.draft {
+                    return Ok(markdown_files);
+                }
+
+                markdown_files.insert(file, markdown);
+
                 Ok(markdown_files)
             },
         )
