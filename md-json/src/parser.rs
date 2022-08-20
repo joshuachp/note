@@ -1,3 +1,10 @@
+//! Markdown parser using [`pulldown_cmark`]
+//!
+//! ### Html
+//!
+//! The content of HTML tags must not be separated by empty lines. Otherwise
+//! the parser could parse it as different HTML events.
+
 use chrono::NaiveDate;
 use nom::{
     branch::alt,
