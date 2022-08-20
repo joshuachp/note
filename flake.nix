@@ -20,24 +20,25 @@
       flake = false;
     };
   };
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    naersk,
-    fenix,
-    ...
-  }:
-    flake-utils.lib.eachDefaultSystem (system: let
+  outputs =
+    { self
+    , nixpkgs
+    , flake-utils
+    , naersk
+    , fenix
+    , ...
+    }:
+    flake-utils.lib.eachDefaultSystem (system:
+    let
       pkgs = nixpkgs.legacyPackages.${system};
-      naersk-lib = pkgs.callPackage naersk {};
-    in rec {
+      naersk-lib = pkgs.callPackage naersk { };
+    in
+    rec {
       packages.default =
         (naersk-lib.override {
           inherit (fenix.packages.${system}.stable) cargo rustc;
-        })
-        .buildPackage {
-          nativeBuildInputs = with pkgs; [installShellFiles];
+        }).buildPackage {
+          nativeBuildInputs = with pkgs; [ installShellFiles ];
           root = ./.;
           overrideMain = _: {
             postInstall = ''
