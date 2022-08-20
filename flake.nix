@@ -28,43 +28,66 @@
     , fenix
     , ...
     }:
-    flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = nixpkgs.legacyPackages.${system};
-      naersk-lib = pkgs.callPackage naersk { };
+      supportedSystems = with flake-utils.lib.system; [
+        x86_64-linux
+        x86_64-darwin
+        aarch64-linux
+        aarch64-darwin
+      ];
+      eachSystemMap = flake-utils.lib.eachSystemMap supportedSystems;
     in
     rec {
-      packages.default =
-        (naersk-lib.override {
-          inherit (fenix.packages.${system}.stable) cargo rustc;
-        }).buildPackage {
-          nativeBuildInputs = with pkgs; [ installShellFiles ];
-          root = ./.;
-          overrideMain = _: {
-            postInstall = ''
-              installShellCompletion --cmd note \
-                --bash <($out/bin/note completion bash) \
-                --fish <($out/bin/note completion fish) \
-                --zsh <($out/bin/note completion zsh)
-            '';
-          };
+      packages = eachSystemMap (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          naersk-lib = naersk.lib.${system};
+          fenix-pkg = fenix.packages.${system}.stable;
+        in
+        {
+          default =
+            (naersk-lib.override {
+              inherit (fenix-pkg) cargo rustc;
+            }).buildPackage {
+              nativeBuildInputs = with pkgs; [ installShellFiles ];
+              root = ./.;
+              overrideMain = _: {
+                postInstall = ''
+                  installShellCompletion --cmd note \
+                    --bash <($out/bin/note completion bash) \
+                    --fish <($out/bin/note completion fish) \
+                    --zsh <($out/bin/note completion zsh)
+                '';
+              };
+            };
+        });
+
+      apps = eachSystemMap (system: {
+        default = flake-utils.lib.mkApp {
+          drv = packages.${system}.default;
         };
+      });
 
-      app.default = flake-utils.lib.mkApp {
-        drv = packages.default;
-      };
-
-      devShells.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          (fenix.packages.${system}.stable.withComponents [
-            "cargo"
-            "clippy"
-            "rust-src"
-            "rustc"
-            "rustfmt"
-          ])
-          pre-commit
-        ];
-      };
-    });
+      devShells = eachSystemMap (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          fenix-pkg = fenix.packages.${system}.stable;
+        in
+        {
+          default =
+            pkgs.mkShell
+              {
+                buildInputs = with pkgs; [
+                  (fenix-pkg.withComponents [
+                    "cargo"
+                    "clippy"
+                    "rust-src"
+                    "rustc"
+                    "rustfmt"
+                  ])
+                  pre-commit
+                ];
+              };
+        });
+    };
 }
