@@ -6,6 +6,7 @@
 //! the parser could parse it as different HTML events.
 
 use chrono::NaiveDate;
+use html_parse::html::Html;
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
@@ -74,7 +75,16 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
     let date = NaiveDate::parse_from_str(&date, "%Y-%m-%d").map_err(Error::Date)?;
 
     let options = Options::all();
-    let parser = Parser::new_ext(content, options);
+
+    let mut html = Html::parse_fragment(content);
+
+    let fragment = html.tree.first_node_id().unwrap();
+    html.tree.remove(fragment).unwrap();
+    let html_tag = html.tree.first_node_id().unwrap();
+    html.tree.remove(html_tag).unwrap();
+
+    println!("{}", serde_json::to_string(&html).unwrap());
+    panic!();
 
     Ok(Markdown {
         title,
@@ -83,24 +93,29 @@ pub fn parse(markdown: &str) -> Result<Markdown, Error> {
         date,
         draft: draft.unwrap_or(false),
         language,
-        content: parser.collect(),
+        content: Vec::new(),
     })
 }
 
 #[cfg(test)]
 mod test {
-    use super::front_matter_parser;
+    use std::fs;
+
+    use super::{front_matter_parser, parse};
 
     #[test]
     fn should_parse_front_matter() {
-        let markdown = r#"---
-title: "some"
----
-
-# Hello world"#;
+        let markdown = include_str!("../assets/front_matter.md");
 
         let result = front_matter_parser(markdown);
 
-        assert_eq!(result, Ok(("\n# Hello world", "title: \"some\"\n")));
+        assert_eq!(result, Ok(("\n# Hello world\n", "title: \"some\"\n")));
+    }
+
+    #[test]
+    fn should_parse_html() {
+        let html = include_str!("../assets/html.md");
+
+        parse(html).unwrap();
     }
 }
