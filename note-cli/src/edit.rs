@@ -89,7 +89,7 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
 pub fn edit_journal(config: &Config, date: Option<&str>) -> Result<(), EditError> {
     let date = match date {
         Some(date) => NaiveDate::from_str(date).map_err(EditError::Date)?,
-        None => Local::today().naive_local(),
+        None => Local::now().date_naive(),
     };
 
     let mut entry = PathBuf::from("journal");

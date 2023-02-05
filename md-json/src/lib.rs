@@ -37,7 +37,7 @@ pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
             |files, entry| -> Result<&mut Vec<File>, Error> {
                 let path = entry.path();
 
-                let content = fs::read_to_string(&path).map_err(Error::File)?;
+                let content = fs::read_to_string(path).map_err(Error::File)?;
                 let file = path.file_stem().unwrap().to_string_lossy().to_string();
 
                 trace!("{}", file);

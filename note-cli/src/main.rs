@@ -83,7 +83,7 @@ fn main() {
                     error!("Error: {}", err);
                     panic!();
                 }
-                Ok(json) => println!("{}", json),
+                Ok(json) => println!("{json}"),
             },
             Command::Completion { .. } => unreachable!("should have returned before"),
         },
