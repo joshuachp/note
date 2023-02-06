@@ -1,6 +1,7 @@
 mod error;
 mod parser;
 
+use std::path::PathBuf;
 use std::{ffi::OsStr, fs};
 
 use indexmap::IndexMap;
@@ -24,6 +25,10 @@ struct File {
 /// - Missing headers
 pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
     trace!("{}", path);
+
+    if !PathBuf::from(path).exists() {
+        return Err(Error::InvalidPath(path.to_string()));
+    }
 
     let mut files: Vec<File> = Vec::new();
 

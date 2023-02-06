@@ -1,32 +1,25 @@
-use std::{io, process::Command};
+use std::process::Command;
+
+use color_eyre::{
+    eyre::{ensure, Context},
+    Result,
+};
 
 use crate::config::Config;
-
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("error executing sync command: {0}")]
-    Spawn(io::Error),
-    #[error("error waiting command: {0}")]
-    Wait(io::Error),
-    #[error("command did not finish successfully")]
-    Result,
-}
 
 /// Execute sync file command
 ///
 /// # Errors
 ///
 /// This function will return an error if the command file.
-pub fn execute_command(config: &Config) -> Result<(), Error> {
+pub fn execute_command(config: &Config) -> Result<()> {
     let res = Command::new(&config.sync_command)
         .spawn()
-        .map_err(Error::Spawn)?
+        .context("failed to spawn command")?
         .wait()
-        .map_err(Error::Wait)?;
+        .context("failed to wait cor command")?;
 
-    if !res.success() {
-        return Err(Error::Result);
-    }
+    ensure!(res.success(), "command exited with staus {res}");
 
     Ok(())
 }

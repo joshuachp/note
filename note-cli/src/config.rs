@@ -1,5 +1,9 @@
-use std::{env, fs, io};
+use std::{env, fs};
 
+use color_eyre::{
+    eyre::{Context, ContextCompat},
+    Result,
+};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -22,46 +26,33 @@ pub struct Config {
     pub search_command: String,
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("could not find configuration directory")]
-    GetDirectory,
-    #[error("error reading configuration file: {0}")]
-    ReadFile(io::Error),
-    #[error("invalid configuration file: {0}")]
-    WrongConfig(toml::de::Error),
-    #[error("no shell set in configuration and could not read SHELL env variable: {0}")]
-    MissingShell(env::VarError),
-    #[error("no editor set in configuration and could not read EDITOR env variable: {0}")]
-    MissingEditor(env::VarError),
-    #[error("no note path set in configuration and could not read NOTE_PATH env variable: {0}")]
-    MissingNotePath(env::VarError),
-}
-
 impl Config {
-    pub fn read() -> Result<Self, Error> {
-        let mut config_dir = dirs::config_dir().ok_or(Error::GetDirectory)?;
+    pub fn read() -> Result<Self> {
+        let mut config_dir =
+            dirs::config_dir().context("could not find configuration directory")?;
 
         config_dir.push("note");
         config_dir.push("config.toml");
 
-        let file = fs::read_to_string(config_dir).map_err(Error::ReadFile)?;
+        let file = fs::read_to_string(config_dir).context("reading configuration file")?;
 
-        let config: ConfigFile = toml::from_str(&file).map_err(Error::WrongConfig)?;
+        let config: ConfigFile = toml::from_str(&file).context("invalid configuration file")?;
 
         let shell = match config.shell {
             Some(shell) => shell,
-            None => env::var("SHELL").map_err(Error::MissingShell)?,
+            None => env::var("SHELL").context("failed to read SHELL environment variable")?,
         };
 
         let editor = match config.editor {
             Some(editor) => editor,
-            None => env::var("EDITOR").map_err(Error::MissingEditor)?,
+            None => env::var("EDITOR").context("failed to read EDITOR environment variable")?,
         };
 
         let note_path = match config.note_path {
             Some(note_path) => note_path,
-            None => env::var("NOTE_PATH").map_err(Error::MissingNotePath)?,
+            None => {
+                env::var("NOTE_PATH").context("failed to read NOTE_PATH environment variable")?
+            }
         };
 
         Ok(Self {

@@ -8,6 +8,7 @@ members = [
 chrono = "0.4.23"
 clap = "4.1.4"
 clap_complete = "4.1.1"
+color-eyre = "0.6.2"
 dirs = "4.0.0"
 env_logger = "0.10.0"
 indexmap = "1.9.2"

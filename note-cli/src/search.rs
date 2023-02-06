@@ -1,65 +1,52 @@
-use std::{
-    io,
-    process::{Command, Stdio},
-};
+use std::process::{Command, Stdio};
 
+use color_eyre::{
+    eyre::{ensure, Context},
+    Result,
+};
 use log::{debug, trace};
 
-use crate::{
-    config::Config,
-    edit::{note, Error as EditError},
-};
+use crate::{config::Config, edit::note};
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("failed to execute the command: {0}")]
-    Exec(io::Error),
-    #[error("command finished with errors: {0}")]
-    Status(String),
-    #[error("invalid UTF8 output: {0}")]
-    Utf8(std::string::FromUtf8Error),
-    #[error("failed to edit note: {0}")]
-    Edit(EditError),
-}
-
-pub fn execute_command(config: &Config, cmd: &str, search: &str) -> Result<String, Error> {
+pub fn execute_command(config: &Config, cmd: &str, search: &str) -> Result<String> {
     let output = Command::new(&config.shell)
         .current_dir(&config.note_path)
         .env("SEARCH", search)
         .args(["-c", cmd])
         .stdout(Stdio::piped())
         .spawn()
-        .map_err(Error::Exec)?
+        .context("failed to execute search command")?
         .wait_with_output()
-        .map_err(Error::Exec)?;
+        .context("failed to execute search command")?;
 
     debug!("status: {}", &output.status);
     debug!("stdout: {:?}", &output.stdout);
     debug!("stderr: {:?}", &output.stderr);
 
-    if !output.status.success() {
-        let stderr = String::from_utf8(output.stderr).map_err(Error::Utf8)?;
+    ensure!(
+        output.status.success(),
+        "command returned with status {}",
+        output.status
+    );
 
-        return Err(Error::Status(stderr));
-    }
-
-    let result = String::from_utf8(output.stdout).map_err(Error::Utf8)?;
+    let result = String::from_utf8(output.stdout).context("failed to read command stdout")?;
 
     Ok(result)
 }
 
-pub fn find_file(config: &Config, file: &str) -> Result<(), Error> {
+pub fn find_file(config: &Config, file: &str) -> Result<()> {
     let output = execute_command(config, &config.find_command, file)?;
 
     trace!("{}", output);
 
-    note(config, output.trim()).map_err(Error::Edit)
+    note(config, output.trim())?;
+    Ok(())
 }
 
-pub fn grep_content(config: &Config, search: &str) -> Result<(), Error> {
+pub fn grep_content(config: &Config, search: &str) -> Result<()> {
     let output = execute_command(config, &config.search_command, search)?;
 
     trace!("{}", output);
 
-    note(config, output.trim()).map_err(Error::Edit)
+    note(config, output.trim())
 }

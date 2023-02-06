@@ -1,29 +1,12 @@
 use chrono::{Local, NaiveDate};
-use log::trace;
-use std::{
-    fs, io,
-    path::PathBuf,
-    process::{Command, ExitStatus},
-    str::FromStr,
+use color_eyre::{
+    eyre::{ensure, Context},
+    Result,
 };
+use log::trace;
+use std::{fs, path::PathBuf, process::Command, str::FromStr};
 
 use crate::config::Config;
-
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("error creating parent directory: {0}")]
-    ParentDir(io::Error),
-    #[error("path is not a file")]
-    NotFile,
-    #[error("failed to spawn editor: {0}")]
-    Spawn(io::Error),
-    #[error("failed to wait editor process: {0}")]
-    Wait(io::Error),
-    #[error("invalid date: {0}")]
-    Date(chrono::ParseError),
-    #[error("EDITOR commmand returned with error code {0}")]
-    EditFailed(ExitStatus),
-}
 
 fn get_path(base_path: &str, path: &str) -> PathBuf {
     let mut file_path = PathBuf::from(base_path);
@@ -48,7 +31,7 @@ fn get_path(base_path: &str, path: &str) -> PathBuf {
     file_path
 }
 
-pub fn note(config: &Config, path: &str) -> Result<(), Error> {
+pub fn note(config: &Config, path: &str) -> Result<()> {
     trace!("Path {}", path);
 
     let file_path = get_path(&config.note_path, path);
@@ -60,42 +43,31 @@ pub fn note(config: &Config, path: &str) -> Result<(), Error> {
         if !parent.is_dir() {
             trace!("Creating parent directory: {parent:?}");
 
-            fs::create_dir_all(parent).map_err(Error::ParentDir)?;
+            fs::create_dir_all(parent).context("failed to create parent directories")?;
         }
     }
 
-    match fs::metadata(&file_path) {
-        Ok(metadata) => {
-            trace!("File exists");
+    let metadata = fs::metadata(&file_path).context("reading file metadata")?;
 
-            if !metadata.is_file() {
-                return Err(Error::NotFile);
-            }
-        }
-        Err(err) => {
-            trace!("Metadata error: {}", err);
-        }
-    }
+    ensure!(metadata.is_file(), "not a file");
 
     let res = Command::new(&config.editor)
         .args([&file_path])
         .spawn()
-        .map_err(Error::Spawn)?
+        .context("failed to spawn editor")?
         .wait()
-        .map_err(Error::Wait)?;
+        .context("failed to wait to editor")?;
 
     trace!("Result {}", res);
 
-    if !res.success() {
-        return Err(Error::EditFailed(res));
-    }
+    ensure!(res.success(), "editor returned with status code {res}");
 
     Ok(())
 }
 
-pub fn journal(config: &Config, date: Option<&str>) -> Result<(), Error> {
+pub fn journal(config: &Config, date: Option<&str>) -> Result<()> {
     let date = match date {
-        Some(date) => NaiveDate::from_str(date).map_err(Error::Date)?,
+        Some(date) => NaiveDate::from_str(date).context(format!("failed to parse date {date}"))?,
         None => Local::now().date_naive(),
     };
 

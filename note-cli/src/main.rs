@@ -5,8 +5,9 @@ mod search;
 mod sync;
 
 use clap::Parser;
+use color_eyre::{Report, Result};
 use config::Config;
-use log::{error, trace};
+use log::trace;
 use md_json::md_to_json;
 
 use crate::{
@@ -16,7 +17,8 @@ use crate::{
     sync::execute_command,
 };
 
-fn main() {
+fn main() -> Result<(), Report> {
+    color_eyre::install()?;
     env_logger::init();
 
     let cli = Cli::parse();
@@ -25,73 +27,41 @@ fn main() {
 
     if let Some(Command::Completion { shell }) = cli.command {
         generate_completion(shell);
-        return;
+
+        return Ok(());
     }
 
-    let config = match Config::read() {
-        Ok(config) => config,
-        Err(err) => {
-            error!("Error: {}", err);
-            panic!();
-        }
-    };
+    let config = Config::read()?;
 
     trace!("{:?}", config);
 
     match cli.command {
         Some(command) => match command {
-            Command::Edit(edit) => {
-                if let Err(err) = note(&config, &edit.path) {
-                    error!("Error: {}", err);
-                    panic!();
-                }
-            }
-            Command::Journal { date } => {
-                if let Err(err) = journal(&config, date.as_deref()) {
-                    error!("Error: {}", err);
-                    panic!();
-                }
-            }
-            Command::Todo => {
-                if let Err(err) = note(&config, "todo") {
-                    error!("Error: {}", err);
-                    panic!();
-                }
-            }
+            Command::Edit(edit) => note(&config, &edit.path),
+            Command::Journal { date } => journal(&config, date.as_deref()),
+            Command::Todo => note(&config, "todo"),
             Command::Search { content } => {
                 let content = content.as_deref().unwrap_or("");
-                if let Err(err) = grep_content(&config, content) {
-                    error!("Error: {}", err);
-                    panic!();
-                }
+
+                grep_content(&config, content)?;
+
+                Ok(())
             }
             Command::Find { filename } => {
                 let content = filename.as_deref().unwrap_or("");
-                if let Err(err) = find_file(&config, content) {
-                    error!("Error: {}", err);
-                    panic!();
-                }
+                find_file(&config, content)?;
+
+                Ok(())
             }
-            Command::Sync => {
-                if let Err(err) = execute_command(&config) {
-                    error!("Error: {}", err);
-                    panic!();
-                }
+            Command::Sync => execute_command(&config),
+            Command::Compile { path, drafts } => {
+                let json = md_to_json(&path, !drafts)?;
+                println!("{json}");
+
+                Ok(())
             }
-            Command::Compile { path, drafts } => match md_to_json(&path, !drafts) {
-                Err(err) => {
-                    error!("Error: {}", err);
-                    panic!();
-                }
-                Ok(json) => println!("{json}"),
-            },
             Command::Completion { .. } => unreachable!("should have returned before"),
         },
-        None => {
-            if let Err(err) = note(&config, "inbox") {
-                error!("Error: {}", err);
-                panic!();
-            }
-        }
+        None => note(&config, "inbox"),
     }
 }
