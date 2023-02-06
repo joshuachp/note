@@ -1,11 +1,16 @@
 use chrono::{Local, NaiveDate};
 use log::trace;
-use std::{fs, io, path::PathBuf, process::Command, str::FromStr};
+use std::{
+    fs, io,
+    path::PathBuf,
+    process::{Command, ExitStatus},
+    str::FromStr,
+};
 
 use crate::config::Config;
 
 #[derive(Debug, thiserror::Error)]
-pub enum EditError {
+pub enum Error {
     #[error("error creating parent directory: {0}")]
     ParentDir(io::Error),
     #[error("path is not a file")]
@@ -16,6 +21,8 @@ pub enum EditError {
     Wait(io::Error),
     #[error("invalid date: {0}")]
     Date(chrono::ParseError),
+    #[error("EDITOR commmand returned with error code {0}")]
+    EditFailed(ExitStatus),
 }
 
 fn get_path(base_path: &str, path: &str) -> PathBuf {
@@ -41,7 +48,7 @@ fn get_path(base_path: &str, path: &str) -> PathBuf {
     file_path
 }
 
-pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
+pub fn note(config: &Config, path: &str) -> Result<(), Error> {
     trace!("Path {}", path);
 
     let file_path = get_path(&config.note_path, path);
@@ -53,7 +60,7 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
         if !parent.is_dir() {
             trace!("Creating parent directory: {parent:?}");
 
-            fs::create_dir_all(parent).map_err(EditError::ParentDir)?;
+            fs::create_dir_all(parent).map_err(Error::ParentDir)?;
         }
     }
 
@@ -62,7 +69,7 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
             trace!("File exists");
 
             if !metadata.is_file() {
-                return Err(EditError::NotFile);
+                return Err(Error::NotFile);
             }
         }
         Err(err) => {
@@ -73,22 +80,22 @@ pub fn edit_note(config: &Config, path: &str) -> Result<(), EditError> {
     let res = Command::new(&config.editor)
         .args([&file_path])
         .spawn()
-        .map_err(EditError::Spawn)?
+        .map_err(Error::Spawn)?
         .wait()
-        .map_err(EditError::Wait)?;
+        .map_err(Error::Wait)?;
 
     trace!("Result {}", res);
 
     if !res.success() {
-        panic!("Command fail");
+        return Err(Error::EditFailed(res));
     }
 
     Ok(())
 }
 
-pub fn edit_journal(config: &Config, date: Option<&str>) -> Result<(), EditError> {
+pub fn journal(config: &Config, date: Option<&str>) -> Result<(), Error> {
     let date = match date {
-        Some(date) => NaiveDate::from_str(date).map_err(EditError::Date)?,
+        Some(date) => NaiveDate::from_str(date).map_err(Error::Date)?,
         None => Local::now().date_naive(),
     };
 
@@ -96,5 +103,5 @@ pub fn edit_journal(config: &Config, date: Option<&str>) -> Result<(), EditError
     entry.push(date.to_string());
     entry.set_extension("md");
 
-    edit_note(config, &entry.to_string_lossy())
+    note(config, &entry.to_string_lossy())
 }

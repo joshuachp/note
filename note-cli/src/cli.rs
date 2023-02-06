@@ -79,5 +79,5 @@ pub fn generate_completion(shell: Shell) {
         Shell::Fish => clap_complete::Shell::Fish,
     };
 
-    generate(shell, &mut Cli::command(), "note", &mut io::stdout())
+    generate(shell, &mut Cli::command(), "note", &mut io::stdout());
 }

@@ -3,7 +3,7 @@ use std::{io, process::Command};
 use crate::config::Config;
 
 #[derive(Debug, thiserror::Error)]
-pub enum SyncError {
+pub enum Error {
     #[error("error executing sync command: {0}")]
     Spawn(io::Error),
     #[error("error waiting command: {0}")]
@@ -12,15 +12,20 @@ pub enum SyncError {
     Result,
 }
 
-pub fn sync_files(config: &Config) -> Result<(), SyncError> {
+/// Execute sync file command
+///
+/// # Errors
+///
+/// This function will return an error if the command file.
+pub fn execute_command(config: &Config) -> Result<(), Error> {
     let res = Command::new(&config.sync_command)
         .spawn()
-        .map_err(SyncError::Spawn)?
+        .map_err(Error::Spawn)?
         .wait()
-        .map_err(SyncError::Wait)?;
+        .map_err(Error::Wait)?;
 
     if !res.success() {
-        return Err(SyncError::Result);
+        return Err(Error::Result);
     }
 
     Ok(())

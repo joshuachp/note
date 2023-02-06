@@ -23,7 +23,7 @@ pub struct Config {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum ConfigError {
+pub enum Error {
     #[error("could not find configuration directory")]
     GetDirectory,
     #[error("error reading configuration file: {0}")]
@@ -39,29 +39,29 @@ pub enum ConfigError {
 }
 
 impl Config {
-    pub fn read() -> Result<Self, ConfigError> {
-        let mut config_dir = dirs::config_dir().ok_or(ConfigError::GetDirectory)?;
+    pub fn read() -> Result<Self, Error> {
+        let mut config_dir = dirs::config_dir().ok_or(Error::GetDirectory)?;
 
         config_dir.push("note");
         config_dir.push("config.toml");
 
-        let file = fs::read_to_string(config_dir).map_err(ConfigError::ReadFile)?;
+        let file = fs::read_to_string(config_dir).map_err(Error::ReadFile)?;
 
-        let config: ConfigFile = toml::from_str(&file).map_err(ConfigError::WrongConfig)?;
+        let config: ConfigFile = toml::from_str(&file).map_err(Error::WrongConfig)?;
 
         let shell = match config.shell {
             Some(shell) => shell,
-            None => env::var("SHELL").map_err(ConfigError::MissingShell)?,
+            None => env::var("SHELL").map_err(Error::MissingShell)?,
         };
 
         let editor = match config.editor {
             Some(editor) => editor,
-            None => env::var("EDITOR").map_err(ConfigError::MissingEditor)?,
+            None => env::var("EDITOR").map_err(Error::MissingEditor)?,
         };
 
         let note_path = match config.note_path {
             Some(note_path) => note_path,
-            None => env::var("NOTE_PATH").map_err(ConfigError::MissingNotePath)?,
+            None => env::var("NOTE_PATH").map_err(Error::MissingNotePath)?,
         };
 
         Ok(Self {

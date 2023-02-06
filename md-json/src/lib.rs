@@ -16,6 +16,12 @@ struct File {
     content: String,
 }
 
+/// Convert markdown file to JSON
+///
+/// # Errors
+///
+/// - IO errors
+/// - Missing headers
 pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
     trace!("{}", path);
 
@@ -23,7 +29,7 @@ pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
 
     WalkDir::new(path)
         .into_iter()
-        .filter_map(|entry| entry.ok())
+        .filter_map(Result::ok)
         .filter(|entry| {
             trace!("{:?}", &entry);
 
@@ -37,8 +43,14 @@ pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
             |files, entry| -> Result<&mut Vec<File>, Error> {
                 let path = entry.path();
 
+                trace!("{:?}", path);
+
                 let content = fs::read_to_string(path).map_err(Error::File)?;
-                let file = path.file_stem().unwrap().to_string_lossy().to_string();
+                let file = path
+                    .file_stem()
+                    .ok_or_else(|| Error::InvalidPath(path.to_string_lossy().to_string()))?
+                    .to_string_lossy()
+                    .to_string();
 
                 trace!("{}", file);
                 trace!("{}", content);

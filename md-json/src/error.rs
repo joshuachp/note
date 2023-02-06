@@ -12,4 +12,6 @@ pub enum Error {
     ToJson(serde_json::Error),
     #[error("invalid date format: {0}")]
     Date(chrono::format::ParseError),
+    #[error("invalid file name: {0}")]
+    InvalidPath(String),
 }
