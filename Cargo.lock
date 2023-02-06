@@ -526,6 +526,7 @@ dependencies = [
  "env_logger",
  "log",
  "md-json",
+ "regex",
  "serde",
  "toml",
 ]

@@ -1,9 +1,9 @@
 //! CLI interface and completion
 
-use std::io;
-
 use clap::{Args, CommandFactory, Parser, Subcommand, ValueEnum, ValueHint};
 use clap_complete::generate;
+use color_eyre::Result;
+use regex::Regex;
 
 /// Note taking utility
 #[derive(Debug, Parser)]
@@ -65,19 +65,34 @@ pub enum Command {
     },
 }
 
-#[derive(Debug, Clone, Copy, ValueEnum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum Shell {
     Bash,
     Zsh,
     Fish,
 }
 
-pub fn generate_completion(shell: Shell) {
-    let shell = match shell {
+pub fn generate_completion(shell: Shell) -> Result<()> {
+    let completion_shell = match shell {
         Shell::Bash => clap_complete::Shell::Bash,
         Shell::Zsh => clap_complete::Shell::Zsh,
         Shell::Fish => clap_complete::Shell::Fish,
     };
 
-    generate(shell, &mut Cli::command(), "note", &mut io::stdout());
+    let mut buff: Vec<u8> = Vec::new();
+
+    generate(completion_shell, &mut Cli::command(), "note", &mut buff);
+
+    let mut completion = String::from_utf8(buff)?;
+
+    if shell == Shell::Zsh {
+        let pattern = Regex::new(r#"(?m)^'(.*:_files)'"#)?;
+        completion = pattern
+            .replace_all(&completion, r#""$1 -W $$NOTE_PATH -g '*.md'""#)
+            .to_string();
+    }
+
+    print!("{completion}");
+
+    Ok(())
 }

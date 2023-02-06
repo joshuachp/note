@@ -11,12 +11,13 @@ path = "src/main.rs"
 chrono.workspace = true
 clap = { workspace = true, features = [ "derive" ] }
 clap_complete.workspace = true
+color-eyre = { workspace = true, default-features = false }
 dirs.workspace = true
 env_logger.workspace = true
 log.workspace = true
+regex.workspace = true
 serde = { workspace = true, features = [ "derive" ] }
 toml.workspace = true
-color-eyre = { workspace = true, default-features = false }
 
 [dependencies.md-json]
 path = "../md-json"

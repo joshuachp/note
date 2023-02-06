@@ -25,12 +25,6 @@ fn main() -> Result<(), Report> {
 
     trace!("{:?}", cli);
 
-    if let Some(Command::Completion { shell }) = cli.command {
-        generate_completion(shell);
-
-        return Ok(());
-    }
-
     let config = Config::read()?;
 
     trace!("{:?}", config);
@@ -60,7 +54,7 @@ fn main() -> Result<(), Report> {
 
                 Ok(())
             }
-            Command::Completion { .. } => unreachable!("should have returned before"),
+            Command::Completion { shell } => generate_completion(shell),
         },
         None => note(&config, "inbox"),
     }
