@@ -6,8 +6,8 @@ members = [
 
 [workspace.dependencies]
 chrono = "0.4"
-clap = "3.2"
-clap_complete = "3.2"
+clap = "4.1.4"
+clap_complete = "4.1.1"
 dirs = "4.0"
 env_logger = "0.10.0"
 indexmap = "1.9.2"

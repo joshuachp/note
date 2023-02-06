@@ -2,7 +2,7 @@
 
 use std::io;
 
-use clap::{ArgEnum, Args, IntoApp, Parser, Subcommand, ValueHint};
+use clap::{Args, CommandFactory, Parser, Subcommand, ValueEnum, ValueHint};
 use clap_complete::generate;
 
 /// Note taking utility
@@ -51,7 +51,7 @@ pub enum Command {
     Sync,
     /// Prints the shell completion
     Completion {
-        #[clap(arg_enum)]
+        #[clap(value_enum)]
         shell: Shell,
     },
     /// Compiles notes to JSON
@@ -65,7 +65,7 @@ pub enum Command {
     },
 }
 
-#[derive(Debug, Clone, Copy, ArgEnum)]
+#[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum Shell {
     Bash,
     Zsh,
