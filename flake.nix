@@ -79,6 +79,8 @@
                     "rustfmt"
                   ])
                   pre-commit
+
+                  cargo-edit
                 ];
               };
         });
