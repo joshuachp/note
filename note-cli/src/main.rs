@@ -25,7 +25,7 @@ fn main() -> Result<(), Report> {
 
     trace!("{:?}", cli);
 
-    let config = Config::read()?;
+    let config = Config::read().unwrap_or_default();
 
     trace!("{:?}", config);
 

@@ -16,7 +16,7 @@ struct ConfigFile {
     search_command: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Config {
     pub shell: String,
     pub editor: String,
