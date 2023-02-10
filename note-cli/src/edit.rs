@@ -3,8 +3,8 @@ use color_eyre::{
     eyre::{ensure, Context},
     Result,
 };
-use log::trace;
-use std::{fs, path::PathBuf, process::Command, str::FromStr};
+use log::{debug, trace, warn};
+use std::{fs, io, path::PathBuf, process::Command, str::FromStr};
 
 use crate::config::Config;
 
@@ -41,15 +41,22 @@ pub fn note(config: &Config, path: &str) -> Result<()> {
         trace!("Parent {:?}", parent);
 
         if !parent.is_dir() {
-            trace!("Creating parent directory: {parent:?}");
+            warn!("Creating parent directory: {parent:?}");
 
             fs::create_dir_all(parent).context("failed to create parent directories")?;
         }
     }
 
-    let metadata = fs::metadata(&file_path).context("reading file metadata")?;
-
-    ensure!(metadata.is_file(), "not a file");
+    // Ensure path, if it exists, it has to be a file.
+    match fs::metadata(&file_path) {
+        Ok(metadata) => ensure!(metadata.is_file(), "not a file"),
+        Err(err) if err.kind() == io::ErrorKind::NotFound => {
+            debug!("file '{file_path:?}' does not exists")
+        }
+        Err(err) => {
+            return Err(err).with_context(|| format!("reading file metadata: {file_path:?}"));
+        }
+    }
 
     let res = Command::new(&config.editor)
         .args([&file_path])
