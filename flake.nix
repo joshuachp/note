@@ -78,6 +78,7 @@
                     "rustc"
                     "rustfmt"
                   ])
+                  rust-analyzer
                   pre-commit
 
                   cargo-edit
