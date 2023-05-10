@@ -58,8 +58,14 @@ pub fn note(config: &Config, path: &str) -> Result<()> {
         }
     }
 
-    let res = Command::new(&config.editor)
-        .args([&file_path])
+    let mut command = Command::new(&config.editor);
+    command.args([&file_path]);
+
+    if config.change_dir {
+        command.current_dir(&config.note_path);
+    }
+
+    let res = command
         .spawn()
         .context("failed to spawn editor")?
         .wait()

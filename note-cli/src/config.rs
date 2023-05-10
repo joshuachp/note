@@ -10,16 +10,33 @@ use serde::Deserialize;
 struct ConfigFile {
     shell: Option<String>,
     editor: Option<String>,
+    #[serde(default)]
+    change_dir: bool,
     note_path: Option<String>,
     sync_command: String,
     find_command: String,
     search_command: String,
 }
 
+impl Default for ConfigFile {
+    fn default() -> Self {
+        Self {
+            shell: Default::default(),
+            editor: Default::default(),
+            change_dir: true,
+            note_path: Default::default(),
+            sync_command: String::new(),
+            find_command: String::new(),
+            search_command: String::new(),
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct Config {
     pub shell: String,
     pub editor: String,
+    pub change_dir: bool,
     pub note_path: String,
     pub sync_command: String,
     pub find_command: String,
@@ -59,6 +76,7 @@ impl Config {
             shell,
             editor,
             note_path,
+            change_dir: config.change_dir,
             sync_command: config.sync_command,
             find_command: config.find_command,
             search_command: config.search_command,

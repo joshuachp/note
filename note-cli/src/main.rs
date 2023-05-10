@@ -49,7 +49,7 @@ fn main() -> Result<(), Report> {
             }
             Command::Sync => execute_command(&config),
             Command::Compile { path, drafts } => {
-                let json = md_to_json(&path, !drafts)?;
+                let json = md_to_json(path, !drafts)?;
                 println!("{json}");
 
                 Ok(())

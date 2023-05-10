@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, path::PathBuf};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -13,5 +13,5 @@ pub enum Error {
     #[error("invalid date format: {0}")]
     Date(chrono::format::ParseError),
     #[error("invalid path: {0}")]
-    InvalidPath(String),
+    InvalidPath(PathBuf),
 }
