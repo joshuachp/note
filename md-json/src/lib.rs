@@ -1,11 +1,12 @@
 mod error;
 mod parser;
 
-use std::path::PathBuf;
-use std::{ffi::OsStr, fs};
+use std::fmt::Debug;
+use std::fs;
+use std::path::{Path, PathBuf};
 
 use indexmap::IndexMap;
-use log::trace;
+use tracing::{instrument, trace};
 use walkdir::WalkDir;
 
 use crate::error::Error;
@@ -23,74 +24,66 @@ struct File {
 ///
 /// - IO errors
 /// - Missing headers
-pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
-    trace!("{}", path);
+#[instrument]
+pub fn md_to_json<P>(path: P, skip_drafts: bool) -> Result<String, Error>
+where
+    P: AsRef<Path> + Debug,
+{
+    let path = path.as_ref();
+
+    trace!("{}", path.display());
 
     if !PathBuf::from(path).exists() {
-        return Err(Error::InvalidPath(path.to_string()));
+        return Err(Error::InvalidPath(path.to_path_buf()));
     }
 
-    let mut files: Vec<File> = Vec::new();
-
-    WalkDir::new(path)
+    let files = WalkDir::new(path)
         .into_iter()
         .filter_map(Result::ok)
-        .filter(|entry| {
-            trace!("{:?}", &entry);
-
-            let path = entry.path();
+        .filter_map(|entry| {
+            let path = entry.into_path();
 
             // Filter for markdown files
-            path.is_file() && (path.extension() == Some(OsStr::new("md")))
+            match path.extension() {
+                Some(md) if md == "md" && path.is_file() => Some(path),
+                Some(_) | None => None,
+            }
         })
-        .try_fold(
-            &mut files,
-            |files, entry| -> Result<&mut Vec<File>, Error> {
-                let path = entry.path();
+        .map(|path| {
+            // NOTE: maybe we have to canonicalize the path
+            trace!("{}", path.display());
 
-                trace!("{:?}", path);
+            let content = fs::read_to_string(&path).map_err(Error::File)?;
+            let file = path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .map(|s| s.to_string())
+                .ok_or_else(|| Error::InvalidPath(path))?;
 
-                let content = fs::read_to_string(path).map_err(Error::File)?;
-                let file = path
-                    .file_stem()
-                    .ok_or_else(|| Error::InvalidPath(path.to_string_lossy().to_string()))?
-                    .to_string_lossy()
-                    .to_string();
+            trace!("file: `{}` content: `{}`", file, content);
 
-                trace!("{}", file);
-                trace!("{}", content);
-
-                files.push(File { file, content });
-
-                Ok(files)
-            },
-        )
-        .expect("Error reading files");
+            Ok(File { file, content })
+        })
+        .collect::<Result<Vec<File>, Error>>()?;
 
     trace!("{:?}", files);
 
-    let mut markdown_files: IndexMap<&str, Markdown> = IndexMap::new();
-
-    files
+    let mut markdown_files = files
         .iter()
-        .try_fold(
-            &mut markdown_files,
-            |markdown_files, file_content| -> Result<&mut IndexMap<&str, Markdown>, Error> {
-                let File { file, content } = file_content;
+        .filter_map(|file_content| {
+            let File { file, content } = file_content;
 
-                let markdown = parse(content)?;
+            match parse(content) {
+                Ok(markdown) if skip_drafts && markdown.draft => None,
+                Ok(markdown) => Some(Ok((file.as_str(), markdown))),
+                Err(err) => {
+                    trace!("error: {:?}", err);
 
-                // Skip drafts
-                if skip_drafts && markdown.draft {
-                    return Ok(markdown_files);
+                    Some(Err(err))
                 }
-
-                markdown_files.insert(file, markdown);
-
-                Ok(markdown_files)
-            },
-        )
-        .expect("Error parsing markdown");
+            }
+        })
+        .collect::<Result<IndexMap<&str, Markdown>, Error>>()?;
 
     trace!("{:?}", markdown_files);
 
@@ -99,4 +92,31 @@ pub fn md_to_json(path: &str, skip_drafts: bool) -> Result<String, Error> {
     trace!("sorted: {:?}", markdown_files);
 
     serde_json::to_string(&markdown_files).map_err(Error::ToJson)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    pub fn should_walk_dirs() {
+        let dir = tempdir::TempDir::new("md-json").expect("failed to create temp dir");
+
+        let file = dir.path().join("test.md");
+
+        std::fs::write(file, include_str!("../assets/example.md")).expect("failed to write file");
+
+        let json = md_to_json(dir.path(), false);
+
+        assert!(
+            json.is_ok(),
+            "failed to convert markdown to json {}",
+            json.unwrap_err()
+        );
+
+        let json = json.unwrap();
+
+        let expected = include_str!("../assets/example.json").trim();
+        assert_eq!(json, expected);
+    }
 }
