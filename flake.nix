@@ -1,8 +1,6 @@
 {
   inputs = {
-    nixpkgs = {
-      url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    };
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,71 +17,55 @@
     , flake-utils
     , naersk
     , fenix
-    , ...
     }:
+    flake-utils.lib.eachDefaultSystem (system:
     let
-      supportedSystems = with flake-utils.lib.system; [
-        x86_64-linux
-        x86_64-darwin
-        aarch64-linux
-        aarch64-darwin
-      ];
-      eachSystemMap = flake-utils.lib.eachSystemMap supportedSystems;
+      pkgs = import nixpkgs { inherit system; };
+      toolchain = fenix.packages.${system}.stable.minimalToolchain;
+      naersk' = pkgs.callPackages naersk {
+        cargo = toolchain;
+        rustc = toolchain;
+      };
     in
     rec {
-      packages = eachSystemMap (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          naersk-lib = naersk.lib.${system};
-          fenix-pkg = fenix.packages.${system}.stable;
-        in
-        {
-          default =
-            (naersk-lib.override {
-              inherit (fenix-pkg) cargo rustc;
-            }).buildPackage {
-              nativeBuildInputs = with pkgs; [ installShellFiles ];
-              root = ./.;
-              overrideMain = _: {
-                postInstall = ''
-                  installShellCompletion --cmd note \
-                    --bash <($out/bin/note completion bash) \
-                    --fish <($out/bin/note completion fish) \
-                    --zsh <($out/bin/note completion zsh)
-                '';
-              };
-            };
-        });
-
-      apps = eachSystemMap (system: {
-        default = flake-utils.lib.mkApp {
-          drv = packages.${system}.default;
+      packages = {
+        note = naersk'.buildPackage {
+          pname = "note";
+          src = ./.;
+          nativeBuildInputs = with pkgs; [ installShellFiles ];
+          postInstall = ''
+            installShellCompletion --cmd note \
+              --bash <($out/bin/note completion bash) \
+              --fish <($out/bin/note completion fish) \
+              --zsh <($out/bin/note completion zsh)
+          '';
         };
-      });
+        default = packages.note;
+      };
+      apps = {
+        note = flake-utils.lib.mkApp {
+          drv = packages.default;
+        };
+        default = apps.note;
+      };
 
-      devShells = eachSystemMap (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          fenix-pkg = fenix.packages.${system}.stable;
-        in
-        {
-          default =
-            pkgs.mkShell
-              {
-                buildInputs = with pkgs; [
-                  (fenix-pkg.withComponents [
-                    "cargo"
-                    "clippy"
-                    "rust-src"
-                    "rustc"
-                    "rustfmt"
-                  ])
-                  rust-analyzer
-                  pre-commit
-
-                  cargo-edit
-                ];
-              };
-        });
-    };
+      devShells = {
+        default = pkgs.mkShell {
+          inputsFrom = [
+            packages.note
+          ];
+          packages = with pkgs; [
+            (fenix.packages.${system}.stable.withComponents [
+              "cargo"
+              "clippy"
+              "rust-src"
+              "rustc"
+              "rustfmt"
+            ])
+            rust-analyzer
+            pre-commit
+          ];
+        };
+      };
+    });
 }
