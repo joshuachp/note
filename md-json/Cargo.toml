@@ -13,6 +13,7 @@ env_logger.workspace = true
 indexmap = { workspace = true, features = [ "serde" ] }
 log.workspace = true
 nom.workspace = true
+html_parse = { workspace = true, features = [ "serde" ] }
 pulldown-cmark = { workspace = true, features = ["serde"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
