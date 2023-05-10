@@ -3,21 +3,20 @@ name = "note-cli"
 version = "0.1.0"
 edition = "2021"
 
+# We declare this bin because we want the default binary to be called `note`
 [[bin]]
 name = "note"
 path = "src/main.rs"
 
 [dependencies]
-chrono.workspace = true
-clap = { workspace = true, features = [ "derive" ] }
-clap_complete.workspace = true
-color-eyre = { workspace = true, default-features = false }
-dirs.workspace = true
-env_logger.workspace = true
-log.workspace = true
-regex.workspace = true
-serde = { workspace = true, features = [ "derive" ] }
-toml.workspace = true
-
-[dependencies.md-json]
-path = "../md-json"
+chrono = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+clap_complete = { workspace = true }
+color-eyre = { workspace = true }
+dirs = { workspace = true }
+env_logger = { workspace = true }
+log = { workspace = true }
+md-json = { path = "../md-json" }
+regex = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+toml = { workspace = true }

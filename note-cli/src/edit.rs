@@ -51,7 +51,7 @@ pub fn note(config: &Config, path: &str) -> Result<()> {
     match fs::metadata(&file_path) {
         Ok(metadata) => ensure!(metadata.is_file(), "not a file"),
         Err(err) if err.kind() == io::ErrorKind::NotFound => {
-            debug!("file '{file_path:?}' does not exists")
+            debug!("file '{file_path:?}' does not exists");
         }
         Err(err) => {
             return Err(err).with_context(|| format!("reading file metadata: {file_path:?}"));
