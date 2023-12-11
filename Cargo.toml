@@ -3,6 +3,7 @@ members = [
   "note-cli",
   "md-json",
 ]
+resolver = "2"
 
 [workspace.dependencies]
 chrono = "0.4.26"
