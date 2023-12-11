@@ -15,4 +15,5 @@ jobs:
   check:
     uses: ./.github/workflows/check.yml
   test:
+    secrets: inherit
     uses: ./.github/workflows/test.yml
