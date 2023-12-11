@@ -1,16 +1,15 @@
-permissions:
-  contents: read
+name: rolling
 on:
   push:
     branches: [main]
   pull_request:
   schedule:
-    - cron:  '7 7 * * *'
-# Spend CI time only on latest ref: https://github.com/jonhoo/rust-ci-conf/pull/5
+    - cron:  '0 5 * * 6'
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
-name: rolling
+permissions:
+  contents: read
 jobs:
   # https://twitter.com/mycoliza/status/1571295690063753218
   nightly:
@@ -22,6 +21,10 @@ jobs:
           submodules: true
       - name: Install nightly
         uses: dtolnay/rust-toolchain@nightly
+      - name: Install sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.3
+      - name: Run sccache stat for check
+        run: ${SCCACHE_PATH} --show-stats
       - name: cargo generate-lockfile
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
@@ -42,6 +45,12 @@ jobs:
       - name: Install beta
         if: hashFiles('Cargo.lock') != ''
         uses: dtolnay/rust-toolchain@beta
+      - name: Install sccache-cache
+        if: hashFiles('Cargo.lock') != ''
+        uses: mozilla-actions/sccache-action@v0.0.3
+      - name: Run sccache stat for check
+        if: hashFiles('Cargo.lock') != ''
+        run: ${SCCACHE_PATH} --show-stats
       - name: cargo update
         if: hashFiles('Cargo.lock') != ''
         run: cargo update
