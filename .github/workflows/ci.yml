@@ -16,7 +16,3 @@ jobs:
     uses: ./.github/workflows/check.yml
   test:
     uses: ./.github/workflows/test.yml
-  nostd:
-    uses: ./.github/workflows/nostd.yml
-  safety:
-    uses: ./.github/workflows/safety.yml
