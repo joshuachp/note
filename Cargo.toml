@@ -7,7 +7,7 @@ resolver = "2"
 
 [workspace.dependencies]
 chrono = "0.4.31"
-clap = "4.4.12"
+clap = "4.4.13"
 clap_complete = "4.4.6"
 color-eyre = "0.6.2"
 dirs = "5.0.1"
