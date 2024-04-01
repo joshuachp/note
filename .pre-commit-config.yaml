@@ -10,8 +10,10 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
   - repo: https://github.com/joshuachp/pre-commit-hooks
-    rev: 0.1.32
+    rev: 0.1.35
     hooks:
+      - id: typos
+      - id: committed
       - id: rust-fmt
       - id: rust-clippy
       - id: rust-build
