@@ -29,7 +29,7 @@
       };
       inherit (pkgs) mkShell;
       packages = self.packages.${system};
-      toolchain = pkgs.rust-bin.nightly.latest.default;
+      toolchain = pkgs.rust-bin.stable.latest.default;
       craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
       noteCargoToml = craneLib.crateNameFromCargoToml {
         cargoToml = ./note-cli/Cargo.toml;
@@ -58,16 +58,23 @@
         };
         default = self.apps.${system}.note;
       };
-      devShells = {
-        default = mkShell {
-          inputsFrom = [
-            packages.note
-          ];
-          packages = with pkgs; [
-            rust-analyzer
-            pre-commit
-          ];
+      devShells =
+        let
+          t = pkgs.rust-bin.stable.latest.default.override {
+            extensions = [ "rust-analyzer" "rust-src" ];
+          };
+        in
+        {
+          default = mkShell {
+            inputsFrom = [
+              packages.note
+            ];
+            packages = with pkgs; [
+              pre-commit
+              t
+            ];
+            RUST_SRC_PATH = "${t}";
+          };
         };
-      };
     });
 }
