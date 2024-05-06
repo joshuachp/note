@@ -1,9 +1,12 @@
 [workspace]
 members = [
+  "md-parser",
   "note-cli",
-  "md-json",
 ]
 resolver = "2"
+
+[workspace.package]
+edition = "2021"
 
 [workspace.dependencies]
 chrono = "0.4.38"
@@ -11,17 +14,18 @@ clap = "4.5.4"
 clap_complete = "4.5.2"
 color-eyre = "0.6.3"
 dirs = "5.0.1"
-env_logger = "0.10.2"
-tracing = "0.1.40"
+env_logger = "0.11.3"
 indexmap = "2.2.6"
 log = "0.4.21"
-nom = "7.1.3"
-pulldown-cmark = "0.9.6"
+md-parser = { path = "./md-parser", version = "=0.1.0" }
+pulldown-cmark = "0.11.0"
 regex = "1.10.4"
-serde = "1.0.200"
-serde_json = "1.0.116"
-serde_yaml = "0.9.34"
-thiserror = "1.0.59"
-toml = "0.8.12"
-tempdir = "0.3.7"
+serde = "1.0.203"
+serde_json = "1.0.117"
+tempfile = "3.10.1"
+thiserror = "1.0.61"
+toml = "0.8.13"
+tracing = "0.1.40"
 walkdir = "2.5.0"
+winnow = "0.6.8"
+yaml-rust2 = "0.8.0"

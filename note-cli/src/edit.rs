@@ -4,11 +4,16 @@ use color_eyre::{
     Result,
 };
 use log::{debug, trace, warn};
-use std::{fs, io, path::PathBuf, process::Command, str::FromStr};
+use std::{
+    fs, io,
+    path::{Path, PathBuf},
+    process::Command,
+    str::FromStr,
+};
 
 use crate::config::Config;
 
-fn get_path(base_path: &str, path: &str) -> PathBuf {
+fn get_path(base_path: &Path, path: &str) -> PathBuf {
     let mut file_path = PathBuf::from(base_path);
 
     let path_string: String = path

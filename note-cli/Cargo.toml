@@ -1,7 +1,7 @@
 [package]
 name = "note-cli"
 version = "0.1.0"
-edition = "2021"
+edition = { workspace = true }
 
 # We declare this bin because we want the default binary to be called `note`
 [[bin]]
@@ -16,7 +16,7 @@ color-eyre = { workspace = true }
 dirs = { workspace = true }
 env_logger = { workspace = true }
 log = { workspace = true }
-md-json = { path = "../md-json" }
+md-parser = { workspace = true }
 regex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 toml = { workspace = true }

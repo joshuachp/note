@@ -69,8 +69,8 @@
             inputsFrom = [
               packages.note
             ];
-            packages = with pkgs; [
-              pre-commit
+            packages = [
+              pkgs.pre-commit
               t
             ];
             RUST_SRC_PATH = "${t}";
