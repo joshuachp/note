@@ -19,7 +19,7 @@ pub fn execute_command(config: &Config) -> Result<()> {
         .wait()
         .context("failed to wait cor command")?;
 
-    ensure!(res.success(), "command exited with staus {res}");
+    ensure!(res.success(), "command exited with status {res}");
 
     Ok(())
 }

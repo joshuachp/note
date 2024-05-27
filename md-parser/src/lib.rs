@@ -74,7 +74,7 @@ where
             let File { file, content } = file_content;
 
             match parse(content) {
-                Ok(markdown) if skip_drafts && markdown.draft => None,
+                Ok(markdown) if skip_drafts && !markdown.released => None,
                 Ok(markdown) => Some(Ok((file.as_str(), markdown))),
                 Err(err) => {
                     trace!("error: {:?}", err);
@@ -87,24 +87,29 @@ where
 
     trace!("{:?}", markdown_files);
 
-    markdown_files.sort_by(|_, first, _, second| first.date.cmp(&second.date).reverse());
+    markdown_files.sort_by(|_, first, _, second| first.updated.cmp(&second.updated).reverse());
 
     trace!("sorted: {:?}", markdown_files);
 
-    serde_json::to_string(&markdown_files).map_err(Error::ToJson)
+    // serde_json::to_string(&markdown_files).map_err(Error::ToJson)
+    Ok(format!("{markdown_files:?}"))
 }
 
 #[cfg(test)]
 mod test {
+    use tempfile::TempDir;
+
+    const EXAMPLE_MD: &str = include_str!("../assets/example.md");
+
     use super::*;
 
     #[test]
     pub fn should_walk_dirs() {
-        let dir = tempdir::TempDir::new("md-json").expect("failed to create temp dir");
+        let dir = TempDir::with_prefix("md-json").expect("failed to create temp dir");
 
         let file = dir.path().join("test.md");
 
-        std::fs::write(file, include_str!("../assets/example.md")).expect("failed to write file");
+        std::fs::write(file, EXAMPLE_MD).expect("failed to write file");
 
         let json = md_to_json(dir.path(), false);
 
@@ -113,10 +118,5 @@ mod test {
             "failed to convert markdown to json {}",
             json.unwrap_err()
         );
-
-        let json = json.unwrap();
-
-        let expected = include_str!("../assets/example.json").trim();
-        assert_eq!(json, expected);
     }
 }

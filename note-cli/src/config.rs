@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::{env, fs, path::PathBuf};
 
 use color_eyre::{
     eyre::{Context, ContextCompat},
@@ -37,7 +37,7 @@ pub struct Config {
     pub shell: String,
     pub editor: String,
     pub change_dir: bool,
-    pub note_path: String,
+    pub note_path: PathBuf,
     pub sync_command: String,
     pub find_command: String,
     pub search_command: String,
@@ -75,7 +75,7 @@ impl Config {
         Ok(Self {
             shell,
             editor,
-            note_path,
+            note_path: note_path.into(),
             change_dir: config.change_dir,
             sync_command: config.sync_command,
             find_command: config.find_command,

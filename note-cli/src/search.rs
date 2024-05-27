@@ -8,7 +8,7 @@ use log::{debug, trace};
 
 use crate::{config::Config, edit::note};
 
-pub fn execute_command(config: &Config, cmd: &str, search: &str) -> Result<String> {
+pub fn execute_command(config: &Config, cmd: &str, search: &str) -> Result<Option<String>> {
     let output = Command::new(&config.shell)
         .current_dir(&config.note_path)
         .env("SEARCH", search)
@@ -29,24 +29,33 @@ pub fn execute_command(config: &Config, cmd: &str, search: &str) -> Result<Strin
         output.status
     );
 
-    let result = String::from_utf8(output.stdout).context("failed to read command stdout")?;
+    let path = String::from_utf8(output.stdout).context("invalid UTF-8 in command output")?;
 
-    Ok(result)
+    if path.trim().is_empty() {
+        debug!("empty path");
+
+        return Ok(None);
+    }
+
+    Ok(Some(path))
 }
 
 pub fn find_file(config: &Config, file: &str) -> Result<()> {
-    let output = execute_command(config, &config.find_command, file)?;
+    let Some(output) = execute_command(config, &config.find_command, file)? else {
+        return Ok(());
+    };
 
     trace!("{}", output);
 
-    note(config, output.trim())?;
-    Ok(())
+    note(config, &output)
 }
 
 pub fn grep_content(config: &Config, search: &str) -> Result<()> {
-    let output = execute_command(config, &config.search_command, search)?;
+    let Some(output) = execute_command(config, &config.search_command, search)? else {
+        return Ok(());
+    };
 
     trace!("{}", output);
 
-    note(config, output.trim())
+    note(config, &output)
 }

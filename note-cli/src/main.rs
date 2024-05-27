@@ -8,7 +8,6 @@ use clap::Parser;
 use color_eyre::{Report, Result};
 use config::Config;
 use log::trace;
-use md_json::md_to_json;
 
 use crate::{
     cli::{generate_completion, Cli, Command},
@@ -48,12 +47,6 @@ fn main() -> Result<(), Report> {
                 Ok(())
             }
             Command::Sync => execute_command(&config),
-            Command::Compile { path, drafts } => {
-                let json = md_to_json(path, !drafts)?;
-                println!("{json}");
-
-                Ok(())
-            }
             Command::Completion { shell } => generate_completion(shell),
         },
         None => note(&config, "inbox"),

@@ -54,15 +54,6 @@ pub enum Command {
         #[clap(value_enum)]
         shell: Shell,
     },
-    /// Compiles notes to JSON
-    Compile {
-        #[clap(value_hint(ValueHint::AnyPath))]
-        path: String,
-
-        /// Include drafts in the compiled JSON
-        #[clap(long = "draft")]
-        drafts: bool,
-    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
