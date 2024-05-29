@@ -1,7 +1,7 @@
-use std::{collections::HashSet, str::FromStr};
+use std::{collections::HashSet, fmt::Write, str::FromStr};
 
 use chrono::NaiveDate;
-use pulldown_cmark::{Event, Options};
+use pulldown_cmark::{CodeBlockKind, Event, Options, Tag};
 use winnow::{
     ascii::line_ending,
     combinator::{alt, delimited, eof},
@@ -59,6 +59,97 @@ pub struct Markdown<'a> {
     pub released: bool,
     pub language: Option<Language>,
     pub content: Vec<Event<'a>>,
+}
+
+impl<'a> Markdown<'a> {
+    pub fn content_into_string(&self) -> String {
+        let mut out = String::new();
+
+        for e in &self.content {
+            match e {
+                Event::Start(tag) => write_tag(&mut out, tag),
+                Event::End(_) => {}
+                Event::Text(text)
+                | Event::Code(text)
+                | Event::InlineMath(text)
+                | Event::DisplayMath(text)
+                | Event::Html(text)
+                | Event::InlineHtml(text)
+                | Event::FootnoteReference(text) => {
+                    out.push('\n');
+                    out.push_str(text);
+                }
+                Event::SoftBreak | Event::HardBreak | Event::Rule | Event::TaskListMarker(_) => {}
+            }
+        }
+
+        out
+    }
+}
+
+fn write_tag(out: &mut String, tag: &Tag<'_>) {
+    match tag {
+        Tag::Paragraph => {}
+        Tag::Heading {
+            level: _,
+            id,
+            classes,
+            attrs,
+        } => {
+            out.push('\n');
+            out.push_str(id.as_deref().unwrap_or_default());
+            for class in classes {
+                out.push(' ');
+                out.push_str(class);
+            }
+            for (k, v) in attrs {
+                out.push(' ');
+                out.push_str(k);
+
+                if let Some(v) = v {
+                    out.push(' ');
+                    out.push_str(v);
+                }
+            }
+        }
+        Tag::CodeBlock(CodeBlockKind::Fenced(language)) => {
+            out.push('\n');
+            out.push_str(language);
+        }
+        Tag::FootnoteDefinition(text) => {
+            out.push('\n');
+            out.push_str(text);
+        }
+        Tag::Link {
+            link_type: _,
+            dest_url,
+            title,
+            id,
+        } => {
+            write!(out, "\n{dest_url} {title} {id}").expect("write of a string shouldn't fail");
+        }
+        Tag::Image {
+            link_type: _,
+            dest_url,
+            title,
+            id,
+        } => {
+            write!(out, "\n{dest_url} {title} {id}").expect("write of a string shouldn't fail");
+        }
+        Tag::BlockQuote(_)
+        | Tag::CodeBlock(CodeBlockKind::Indented)
+        | Tag::HtmlBlock
+        | Tag::List(_)
+        | Tag::Item
+        | Tag::Table(_)
+        | Tag::TableHead
+        | Tag::TableRow
+        | Tag::TableCell
+        | Tag::Emphasis
+        | Tag::Strong
+        | Tag::Strikethrough
+        | Tag::MetadataBlock(_) => {}
+    }
 }
 
 #[derive(Debug, Clone)]

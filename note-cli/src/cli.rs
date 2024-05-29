@@ -49,6 +49,12 @@ pub enum Command {
         /// Filename
         filename: Option<String>,
     },
+    /// Full text search of all the notes.
+    #[clap(visible_alias("q"))]
+    Query {
+        // The search query.
+        search: String,
+    },
     /// Sync the notes using the configured sync command
     Sync,
     /// Prints the shell completion
