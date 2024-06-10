@@ -19,7 +19,7 @@ indexmap = "2.2.6"
 log = "0.4.21"
 md-parser = { path = "./md-parser", version = "=0.1.0" }
 pulldown-cmark = "0.11.0"
-regex = "1.10.4"
+regex = "1.10.5"
 serde = "1.0.203"
 serde_json = "1.0.117"
 tempfile = "3.10.1"
