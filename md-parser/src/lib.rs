@@ -10,7 +10,7 @@ use tracing::{instrument, trace};
 use walkdir::WalkDir;
 
 use crate::error::Error;
-use crate::parser::{parse, Markdown};
+pub use crate::parser::{parse, Markdown};
 
 #[derive(Debug)]
 struct File {

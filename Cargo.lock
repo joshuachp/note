@@ -546,6 +546,7 @@ dependencies = [
  "regex",
  "serde",
  "toml",
+ "walkdir",
 ]
 
 [[package]]

@@ -108,8 +108,6 @@ fn front_matter(markdown: &mut &str) -> PResult<FrontMatter> {
 fn parse_front_matter(source: &str) -> Result<FrontMatter, FrontMatterError> {
     let mut scan = yaml_rust2::YamlLoader::load_from_str(source)?;
 
-    dbg!(&scan);
-
     if scan.is_empty() {
         return Err(FrontMatterError::Empty);
     }
