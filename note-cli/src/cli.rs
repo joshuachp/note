@@ -95,7 +95,14 @@ pub fn generate_completion(shell: Shell) -> Result<()> {
             .to_string();
     }
 
-    print!("{completion}");
+    println!("{completion}");
+
+    if shell == Shell::Fish {
+        println!(include_str!("../shell/__note_list_completion.fish"));
+        println!(
+            r#"complete -c note -n "__fish_seen_subcommand_from e edit" -k -f -a '(__note_list_completion)'"#
+        )
+    }
 
     Ok(())
 }

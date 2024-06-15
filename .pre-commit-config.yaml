@@ -20,6 +20,6 @@ repos:
       - id: rust-test
       - id: rust-doc
       - id: rust-hack
-      - id: nix-nixpkgs-fmt
+      - id: nix-nixfmt
       - id: nix-flake-check
       - id: nix-build
