@@ -1,5 +1,7 @@
 //! CLI interface and completion
 
+use std::path::PathBuf;
+
 use clap::{Args, CommandFactory, Parser, Subcommand, ValueEnum, ValueHint};
 use clap_complete::generate;
 use color_eyre::Result;
@@ -24,25 +26,25 @@ pub struct Edit {
 #[derive(Debug, Subcommand)]
 pub enum Command {
     /// Edits a note
-    #[clap(visible_alias("e"))]
+    #[command(visible_alias("e"))]
     Edit(Edit),
     /// Opens the daily journal
-    #[clap(visible_alias("j"))]
+    #[command(visible_alias("j"))]
     Journal {
         /// Journal entry to edit, in the Y-m-d format
         date: Option<String>,
     },
     /// Opens the todo file
-    #[clap(visible_alias("t"))]
+    #[command(visible_alias("t"))]
     Todo,
     /// Search the content of the notes
-    #[clap(visible_alias("s"))]
+    #[command(visible_alias("s"))]
     Search {
         /// Content
         content: Option<String>,
     },
     /// Search the name of the files
-    #[clap(visible_alias("f"))]
+    #[command(visible_alias("f"))]
     Find {
         /// Filename
         filename: Option<String>,
@@ -51,8 +53,18 @@ pub enum Command {
     Sync,
     /// Prints the shell completion
     Completion {
-        #[clap(value_enum)]
+        #[arg(value_enum)]
         shell: Shell,
+    },
+    /// List the notes in $NOTE_PATH or the current directory.
+    #[command(visible_alias("ls"))]
+    List {
+        /// Path to list.
+        #[arg(value_hint(ValueHint::DirPath))]
+        path: Option<PathBuf>,
+
+        #[arg(short = 'd', long, default_value = "1")]
+        max_depth: usize,
     },
 }
 
@@ -83,7 +95,14 @@ pub fn generate_completion(shell: Shell) -> Result<()> {
             .to_string();
     }
 
-    print!("{completion}");
+    println!("{completion}");
+
+    if shell == Shell::Fish {
+        println!(include_str!("../shell/__note_list_completion.fish"));
+        println!(
+            r#"complete -c note -n "__fish_seen_subcommand_from e edit" -k -f -a '(__note_list_completion)'"#
+        )
+    }
 
     Ok(())
 }

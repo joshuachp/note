@@ -1,22 +1,24 @@
 mod cli;
 mod config;
 mod edit;
+mod list;
 mod search;
 mod sync;
 
 use clap::Parser;
-use color_eyre::{Report, Result};
+use color_eyre::eyre::Context;
 use config::Config;
 use log::trace;
 
 use crate::{
     cli::{generate_completion, Cli, Command},
     edit::{journal, note},
+    list::list_path,
     search::{find_file, grep_content},
     sync::execute_command,
 };
 
-fn main() -> Result<(), Report> {
+fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
     env_logger::init();
 
@@ -24,7 +26,7 @@ fn main() -> Result<(), Report> {
 
     trace!("{:?}", cli);
 
-    let config = Config::read().unwrap_or_default();
+    let config = Config::read().wrap_err("couldn't read configuration")?;
 
     trace!("{:?}", config);
 
@@ -48,6 +50,7 @@ fn main() -> Result<(), Report> {
             }
             Command::Sync => execute_command(&config),
             Command::Completion { shell } => generate_completion(shell),
+            Command::List { path, max_depth } => list_path(&config, path, max_depth),
         },
         None => note(&config, "inbox"),
     }
