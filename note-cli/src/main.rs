@@ -8,7 +8,7 @@ mod sync;
 use clap::Parser;
 use color_eyre::eyre::Context;
 use config::Config;
-use log::trace;
+use log::debug;
 
 use crate::{
     cli::{generate_completion, Cli, Command},
@@ -24,11 +24,18 @@ fn main() -> color_eyre::Result<()> {
 
     let cli = Cli::parse();
 
-    trace!("{:?}", cli);
+    debug!("{:?}", cli);
+
+    // Call before reading the config
+    if let Some(Command::Completion { shell }) = cli.command {
+        generate_completion(shell)?;
+
+        return Ok(());
+    }
 
     let config = Config::read().wrap_err("couldn't read configuration")?;
 
-    trace!("{:?}", config);
+    debug!("{:?}", config);
 
     match cli.command {
         Some(command) => match command {
@@ -49,8 +56,8 @@ fn main() -> color_eyre::Result<()> {
                 Ok(())
             }
             Command::Sync => execute_command(&config),
-            Command::Completion { shell } => generate_completion(shell),
             Command::List { path, max_depth } => list_path(&config, path, max_depth),
+            Command::Completion { .. } => unreachable!("already matched"),
         },
         None => note(&config, "inbox"),
     }
