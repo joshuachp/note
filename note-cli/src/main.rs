@@ -2,11 +2,12 @@ mod cli;
 mod config;
 mod edit;
 mod list;
+mod query;
 mod search;
 mod sync;
 
 use clap::Parser;
-use color_eyre::eyre::Context;
+use color_eyre::eyre::WrapErr;
 use config::Config;
 use log::debug;
 
@@ -14,6 +15,7 @@ use crate::{
     cli::{generate_completion, Cli, Command},
     edit::{journal, note},
     list::list_path,
+    query::query,
     search::{find_file, grep_content},
     sync::execute_command,
 };
@@ -57,6 +59,7 @@ fn main() -> color_eyre::Result<()> {
             }
             Command::Sync => execute_command(&config),
             Command::List { path, max_depth } => list_path(&config, path, max_depth),
+            Command::Query { search } => query(&search, &config),
             Command::Completion { .. } => unreachable!("already matched"),
         },
         None => note(&config, "inbox"),

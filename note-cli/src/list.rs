@@ -9,7 +9,7 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::config::Config;
 
-fn is_hidden(entry: &DirEntry) -> bool {
+pub(crate) fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()

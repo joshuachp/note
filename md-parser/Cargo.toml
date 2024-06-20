@@ -15,7 +15,6 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-walkdir = { workspace = true }
 winnow = { workspace = true }
 yaml-rust2 = { workspace = true }
 
