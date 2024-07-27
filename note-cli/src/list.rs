@@ -77,7 +77,7 @@ fn print_entry(entry: DirEntry, note_path: &Path) -> color_eyre::Result<()> {
         return Ok(());
     }
 
-    if !entry.path().extension().is_some_and(|ext| ext == "md") {
+    if entry.path().extension().is_none_or(|ext| ext != "md") {
         debug!("ignoring non markdown file {}", entry.path().display());
 
         return Ok(());
