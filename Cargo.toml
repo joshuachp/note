@@ -15,7 +15,7 @@ clap_complete = "4.5.8"
 color-eyre = "0.6.3"
 dirs = "5.0.1"
 env_logger = "0.11.5"
-indexmap = "2.3.0"
+indexmap = "2.4.0"
 log = "0.4.22"
 md-parser = { path = "./md-parser", version = "=0.1.0" }
 pulldown-cmark = "0.11.0"
