@@ -97,7 +97,10 @@ pub fn query(search: &str, config: &Config) -> eyre::Result<()> {
 
     let searcher = reader.searcher();
 
-    let query_parser = QueryParser::for_index(&index, vec![fields.title, fields.description]);
+    let query_parser = QueryParser::for_index(
+        &index,
+        vec![fields.title, fields.description, fields.content],
+    );
 
     // QueryParser may fail if the query is not in the right
     // format. For user facing applications, this can be a problem.
