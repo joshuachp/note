@@ -1,7 +1,7 @@
 {
   description = "Note taking tool";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-24.11";
     crane.url = "github:ipetkov/crane";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -59,25 +59,13 @@
           note = flake-utils.lib.mkApp { drv = packages.default; };
           default = self.apps.${system}.note;
         };
-        devShells =
-          let
-            t = pkgs.rust-bin.stable.latest.default.override {
-              extensions = [
-                "rust-analyzer"
-                "rust-src"
-              ];
-            };
-          in
-          {
-            default = mkShell {
-              inputsFrom = [ packages.note ];
-              packages = [
-                pkgs.pre-commit
-                t
-              ];
-              RUST_SRC_PATH = "${t}";
-            };
-          };
+        devShells.default = mkShell {
+          inputsFrom = [ packages.note ];
+          packages = [
+            pkgs.pre-commit
+            pkgs.rustup
+          ];
+        };
       }
     );
 }

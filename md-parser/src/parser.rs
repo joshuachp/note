@@ -61,7 +61,7 @@ pub struct Markdown<'a> {
     pub content: Vec<Event<'a>>,
 }
 
-impl<'a> Markdown<'a> {
+impl Markdown<'_> {
     pub fn content_into_string(&self) -> String {
         let mut out = String::new();
 
@@ -148,7 +148,10 @@ fn write_tag(out: &mut String, tag: &Tag<'_>) {
         | Tag::Emphasis
         | Tag::Strong
         | Tag::Strikethrough
-        | Tag::MetadataBlock(_) => {}
+        | Tag::MetadataBlock(_)
+        | Tag::DefinitionList
+        | Tag::DefinitionListTitle
+        | Tag::DefinitionListDefinition => {}
     }
 }
 
