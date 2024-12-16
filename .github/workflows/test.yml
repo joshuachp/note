@@ -23,7 +23,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
       - name: Install sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.6
+        uses: mozilla-actions/sccache-action@v0.0.7
       - name: Run sccache stat for check
         run: ${SCCACHE_PATH} --show-stats
       - name: cargo generate-lockfile
@@ -47,7 +47,7 @@ jobs:
         with:
           components: llvm-tools-preview
       - name: Install sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.6
+        uses: mozilla-actions/sccache-action@v0.0.7
       - name: Run sccache stat for check
         run: ${SCCACHE_PATH} --show-stats
       - name: cargo install cargo-tarpaulin
