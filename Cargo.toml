@@ -20,7 +20,7 @@ log = "0.4.22"
 md-parser = { path = "./md-parser", version = "=0.1.0" }
 pulldown-cmark = "0.12.2"
 regex = "1.11.1"
-serde = "1.0.216"
+serde = "1.0.217"
 serde_json = "1.0.135"
 tantivy = "0.22.0"
 tempfile = "3.14.0"
