@@ -21,7 +21,7 @@ md-parser = { path = "./md-parser", version = "=0.1.0" }
 pulldown-cmark = "0.12.2"
 regex = "1.11.1"
 serde = "1.0.216"
-serde_json = "1.0.133"
+serde_json = "1.0.134"
 tantivy = "0.22.0"
 tempfile = "3.14.0"
 thiserror = "2.0.9"
