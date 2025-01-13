@@ -1,0 +1,39 @@
+module(
+    name = "note",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "rules_rust", version = "0.56.0")
+bazel_dep(name = "toolchains_llvm", version = "1.2.0")
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+
+LLVM_VERSION = "19.1.0"
+
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_version = LLVM_VERSION,
+)
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains("@llvm_toolchain//:all")
+
+RUST_EDITION = "2021"
+
+RUST_VERSION = "1.84.0"
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = RUST_EDITION,
+    sha256s = {
+        "rustc-1.84.0-x86_64-unknown-linux-gnu.tar.xz": "a1737d86f80b31a6d48a6726726275dc068ecb930c9635b13aa59999486de837",
+        "clippy-1.84.0-x86_64-unknown-linux-gnu.tar.xz": "1db0212c08e126bf6ee28a0d363c5d6859fe357aa9e91d0247059397dbe7e1fd",
+        "cargo-1.84.0-x86_64-unknown-linux-gnu.tar.xz": "6c2371488db92a09cd50a1b4045c022f3cf2c643285b3b21105ab5f9b64fd6b6",
+        "llvm-tools-1.84.0-x86_64-unknown-linux-gnu.tar.xz": "683e84d7b8f4b32d4e6b4ce90ccf014deb23317a0babc75ffe6e7022b453cfae",
+        "rust-std-1.84.0-x86_64-unknown-linux-gnu.tar.xz": "770237080b9310d126350c3bd70820bd91064c2e96c29ab5f2e002b31b5bd067",
+    },
+    versions = [RUST_VERSION],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")

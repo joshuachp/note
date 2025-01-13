@@ -59,12 +59,16 @@
           note = flake-utils.lib.mkApp { drv = packages.default; };
           default = self.apps.${system}.note;
         };
-        devShells.default = mkShell {
-          inputsFrom = [ packages.note ];
-          packages = [
-            pkgs.pre-commit
-            pkgs.rustup
-          ];
+        devShells = {
+          default = mkShell {
+            # inputsFrom = [ packages.note ];
+            packages = [
+              pkgs.pre-commit
+
+              pkgs.bazel_7
+              pkgs.buildifier
+            ];
+          };
         };
       }
     );
