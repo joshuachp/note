@@ -9,11 +9,11 @@ mod sync;
 use clap::Parser;
 use color_eyre::eyre::WrapErr;
 use config::Config;
-use tracing::debug;
+use tracing::{debug, trace};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 use crate::{
-    cli::{generate_completion, Cli, Command},
+    cli::{Cli, Command},
     edit::{journal, note},
     list::list_path,
     query::query,
@@ -30,13 +30,11 @@ fn main() -> color_eyre::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .try_init()?;
 
-    debug!("{:?}", cli);
+    trace!("{:?}", cli);
 
     // Call before reading the config
-    if let Some(Command::Completion { shell }) = cli.command {
-        generate_completion(shell)?;
-
-        return Ok(());
+    if let Some(Command::Utils { command }) = &cli.command {
+        return command.run();
     }
 
     let config = Config::read().wrap_err("couldn't read configuration")?;
@@ -64,7 +62,9 @@ fn main() -> color_eyre::Result<()> {
             Command::Sync => execute_command(&config),
             Command::List { path, max_depth } => list_path(&config, path, max_depth),
             Command::Query { search } => query(&search, &config),
-            Command::Completion { .. } => unreachable!("already matched"),
+            Command::Utils { .. } => {
+                unreachable!("already matched");
+            }
         },
         None => note(&config, "inbox"),
     }
