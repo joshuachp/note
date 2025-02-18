@@ -9,7 +9,8 @@ mod sync;
 use clap::Parser;
 use color_eyre::eyre::WrapErr;
 use config::Config;
-use log::debug;
+use tracing::debug;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 use crate::{
     cli::{generate_completion, Cli, Command},
@@ -21,10 +22,13 @@ use crate::{
 };
 
 fn main() -> color_eyre::Result<()> {
-    color_eyre::install()?;
-    env_logger::init();
-
     let cli = Cli::parse();
+
+    color_eyre::install()?;
+    tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer())
+        .try_init()?;
 
     debug!("{:?}", cli);
 

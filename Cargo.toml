@@ -1,32 +1,33 @@
-[workspace]
-members = [
-  "md-parser",
-  "note-cli",
-]
-resolver = "2"
-
-[workspace.package]
+[package]
+name = "note"
+version = "0.1.0"
+categories = ["command-line-utility"]
 edition = "2021"
+keywords = ["notes", "journal", "cli"]
+license = "APACHE-2.0 OR MIT"
+repository = "https://github.com/joshuachp/note"
+description = "Note taking utility"
 
-[workspace.dependencies]
-chrono = "0.4.39"
-clap = "4.5.30"
+[dependencies]
+chrono = { version = "0.4.39", features = ["serde"] }
+clap = { version = "4.5.30", features = ["derive"] }
 clap_complete = "4.5.45"
 color-eyre = "0.6.3"
 dirs = "6.0.0"
 env_logger = "0.11.6"
-indexmap = "2.7.1"
-log = "0.4.25"
-md-parser = { path = "./md-parser", version = "=0.1.0" }
-pulldown-cmark = "0.13.0"
+indexmap = { version = "2.7.1", features = ["serde"] }
+pulldown-cmark = { version = "0.13.0", features = ["serde"] }
 regex = "1.11.1"
-serde = "1.0.217"
+serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.138"
 tantivy = "0.22.0"
-tempfile = "3.17.1"
 thiserror = "2.0.11"
 toml = "0.8.20"
 tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 walkdir = "2.5.0"
 winnow = "0.7.2"
 yaml-rust2 = "0.10.0"
+
+[dev-dependencies]
+tempfile = "3.17.1"

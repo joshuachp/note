@@ -5,7 +5,7 @@ use std::{
 
 use color_eyre::eyre::{self, ensure, Context, OptionExt};
 use dirs::cache_dir;
-use log::{debug, error, trace};
+use note::parser::parse;
 use tantivy::{
     collector::TopDocs,
     directory::MmapDirectory,
@@ -14,6 +14,7 @@ use tantivy::{
     schema::{Field, SchemaBuilder, STORED, TEXT},
     DocAddress, Document, Index, IndexWriter, Score, TantivyDocument,
 };
+use tracing::{debug, error, trace};
 use walkdir::WalkDir;
 
 use crate::{config::Config, list::is_hidden};
@@ -146,7 +147,7 @@ fn read_notes(path: &Path) -> eyre::Result<Vec<MdFile>> {
         trace!("{}", path.display());
 
         let content = fs::read_to_string(path)?;
-        let markdown = match md_parser::parser::parse(&content) {
+        let markdown = match parse(&content) {
             Ok(m) => m,
             Err(err) => {
                 error!(
