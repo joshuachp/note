@@ -4,7 +4,8 @@ use std::{
 };
 
 use color_eyre::eyre::{Context, OptionExt};
-use log::debug;
+use note::parser::parse;
+use tracing::debug;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::config::Config;
@@ -86,8 +87,8 @@ fn print_entry(entry: DirEntry, note_path: &Path) -> color_eyre::Result<()> {
     let content = fs::read_to_string(entry.path())
         .wrap_err_with(|| format!("couldn't read file {}", entry.path().display()))?;
 
-    let note = md_parser::parse(&content)
-        .wrap_err_with(|| format!("couldn't parse {}", entry.path().display()))?;
+    let note =
+        parse(&content).wrap_err_with(|| format!("couldn't parse {}", entry.path().display()))?;
 
     let path = strip_note_prefix(note_path, entry.path())?;
 

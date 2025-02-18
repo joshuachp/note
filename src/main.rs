@@ -9,10 +9,11 @@ mod sync;
 use clap::Parser;
 use color_eyre::eyre::WrapErr;
 use config::Config;
-use log::debug;
+use tracing::{debug, trace};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 use crate::{
-    cli::{generate_completion, Cli, Command},
+    cli::{Cli, Command},
     edit::{journal, note},
     list::list_path,
     query::query,
@@ -21,18 +22,19 @@ use crate::{
 };
 
 fn main() -> color_eyre::Result<()> {
-    color_eyre::install()?;
-    env_logger::init();
-
     let cli = Cli::parse();
 
-    debug!("{:?}", cli);
+    color_eyre::install()?;
+    tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer())
+        .try_init()?;
+
+    trace!("{:?}", cli);
 
     // Call before reading the config
-    if let Some(Command::Completion { shell }) = cli.command {
-        generate_completion(shell)?;
-
-        return Ok(());
+    if let Some(Command::Utils { command }) = &cli.command {
+        return command.run();
     }
 
     let config = Config::read().wrap_err("couldn't read configuration")?;
@@ -60,7 +62,9 @@ fn main() -> color_eyre::Result<()> {
             Command::Sync => execute_command(&config),
             Command::List { path, max_depth } => list_path(&config, path, max_depth),
             Command::Query { search } => query(&search, &config),
-            Command::Completion { .. } => unreachable!("already matched"),
+            Command::Utils { .. } => {
+                unreachable!("already matched");
+            }
         },
         None => note(&config, "inbox"),
     }

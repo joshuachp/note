@@ -57,11 +57,6 @@ pub enum Command {
     },
     /// Sync the notes using the configured sync command
     Sync,
-    /// Prints the shell completion
-    Completion {
-        #[arg(value_enum)]
-        shell: Shell,
-    },
     /// List the notes in $NOTE_PATH or the current directory.
     #[command(visible_alias("ls"))]
     List {
@@ -72,6 +67,38 @@ pub enum Command {
         #[arg(short = 'd', long, default_value = "1")]
         max_depth: usize,
     },
+    /// Utility functions like shell completions
+    Utils {
+        #[command(subcommand)]
+        command: Utils,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum Utils {
+    /// Generates shell completions for the given shell
+    Completion {
+        /// Shell to generate the completion for
+        shell: Shell,
+    },
+    /// Generates the Man pages for the program
+    Manpages {
+        /// Directory to generate the Man pages to.
+        out_dir: PathBuf,
+    },
+}
+
+impl Utils {
+    pub(crate) fn run(&self) -> eyre::Result<()> {
+        match self {
+            Utils::Completion { shell } => shell.generate(),
+            Utils::Manpages { out_dir } => {
+                clap_mangen::generate_to(Cli::command(), out_dir)?;
+
+                Ok(())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
@@ -81,34 +108,36 @@ pub enum Shell {
     Fish,
 }
 
-pub fn generate_completion(shell: Shell) -> Result<()> {
-    let completion_shell = match shell {
-        Shell::Bash => clap_complete::Shell::Bash,
-        Shell::Zsh => clap_complete::Shell::Zsh,
-        Shell::Fish => clap_complete::Shell::Fish,
-    };
+impl Shell {
+    fn generate(&self) -> Result<()> {
+        let completion_shell = match self {
+            Shell::Bash => clap_complete::Shell::Bash,
+            Shell::Zsh => clap_complete::Shell::Zsh,
+            Shell::Fish => clap_complete::Shell::Fish,
+        };
 
-    let mut buff: Vec<u8> = Vec::new();
+        let mut buff: Vec<u8> = Vec::new();
 
-    generate(completion_shell, &mut Cli::command(), "note", &mut buff);
+        generate(completion_shell, &mut Cli::command(), "note", &mut buff);
 
-    let mut completion = String::from_utf8(buff)?;
+        let mut completion = String::from_utf8(buff)?;
 
-    if shell == Shell::Zsh {
-        let pattern = Regex::new(r#"(?m)^'(.*:_files)'"#)?;
-        completion = pattern
-            .replace_all(&completion, r#""$1 -W $$NOTE_PATH -g '*.md'""#)
-            .to_string();
+        if *self == Shell::Zsh {
+            let pattern = Regex::new(r#"(?m)^'(.*:_files)'"#)?;
+            completion = pattern
+                .replace_all(&completion, r#""$1 -W $$NOTE_PATH -g '*.md'""#)
+                .to_string();
+        }
+
+        println!("{completion}");
+
+        if *self == Shell::Fish {
+            println!(include_str!("../shell/__note_list_completion.fish"));
+            println!(
+                r#"complete -c note -n "__fish_seen_subcommand_from e edit" -k -f -a '(__note_list_completion)'"#
+            )
+        }
+
+        Ok(())
     }
-
-    println!("{completion}");
-
-    if shell == Shell::Fish {
-        println!(include_str!("../shell/__note_list_completion.fish"));
-        println!(
-            r#"complete -c note -n "__fish_seen_subcommand_from e edit" -k -f -a '(__note_list_completion)'"#
-        )
-    }
-
-    Ok(())
 }

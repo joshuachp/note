@@ -10,7 +10,9 @@ use winnow::{
 };
 use yaml_rust2::Yaml;
 
-use crate::error::Error;
+use self::error::Error;
+
+pub mod error;
 
 #[derive(thiserror::Error, Debug)]
 pub enum FrontMatterError {

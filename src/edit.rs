@@ -3,13 +3,13 @@ use color_eyre::{
     eyre::{ensure, Context},
     Result,
 };
-use log::{debug, trace, warn};
 use std::{
     fs, io,
     path::{Path, PathBuf},
     process::Command,
     str::FromStr,
 };
+use tracing::{debug, trace, warn};
 
 use crate::config::Config;
 

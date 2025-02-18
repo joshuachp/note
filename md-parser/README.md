@@ -1,3 +1,0 @@
-# md-parser
-
-Markdown parser.

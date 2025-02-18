@@ -4,7 +4,7 @@ use color_eyre::{
     eyre::{ensure, Context},
     Result,
 };
-use log::{debug, trace};
+use tracing::{debug, trace};
 
 use crate::{config::Config, edit::note};
 
