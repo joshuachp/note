@@ -6,7 +6,7 @@ use winnow::{
     ascii::line_ending,
     combinator::{alt, delimited, eof},
     token::take_until,
-    PResult, Parser,
+    Parser,
 };
 use yaml_rust2::Yaml;
 
@@ -152,6 +152,8 @@ fn write_tag(out: &mut String, tag: &Tag<'_>) {
         | Tag::DefinitionList
         | Tag::DefinitionListTitle
         | Tag::DefinitionListDefinition => {}
+        Tag::Superscript => todo!(),
+        Tag::Subscript => todo!(),
     }
 }
 
@@ -190,7 +192,7 @@ impl FromStr for Language {
 #[error("invalid language {0}")]
 pub struct LanguageError(String);
 
-fn front_matter(markdown: &mut &str) -> PResult<FrontMatter> {
+fn front_matter(markdown: &mut &str) -> winnow::Result<FrontMatter> {
     delimited(
         ("---", line_ending),
         take_until(1.., "---").try_map(parse_front_matter),
@@ -304,11 +306,9 @@ fn parse_front_matter(source: &str) -> Result<FrontMatter, FrontMatterError> {
 }
 
 pub fn parse(mut markdown: &str) -> Result<Markdown, Error> {
-    let metadata = front_matter.parse_next(&mut markdown).map_err(|err| {
-        err.into_inner()
-            .map(Error::FrontMatter)
-            .unwrap_or(Error::MissingFrontmatter)
-    })?;
+    let metadata = front_matter
+        .parse_next(&mut markdown)
+        .map_err(Error::FrontMatter)?;
 
     let FrontMatter {
         title,
