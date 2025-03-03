@@ -21,7 +21,7 @@ indexmap = { version = "2.7.1", features = ["serde"] }
 pulldown-cmark = { version = "0.13.0", features = ["serde"] }
 regex = "1.11.1"
 serde = { version = "1.0.218", features = ["derive"] }
-serde_json = "1.0.139"
+serde_json = "1.0.140"
 tantivy = "0.22.0"
 thiserror = "2.0.11"
 toml = "0.8.20"
