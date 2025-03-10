@@ -41,7 +41,7 @@ jobs:
       - name: install build dependencies
         run: dnf builddep -y rpm/rust-note.spec
       - name: Install sccache
-        uses: mozilla-actions/sccache-action@v0.0.7
+        uses: mozilla-actions/sccache-action@v0.0.8
       - name: check rpmlint
         run: rpmlint rpm/rust-note.spec
       - name: build the rpm
