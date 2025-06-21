@@ -37,6 +37,8 @@ fn get_path(base_path: &Path, path: &str) -> PathBuf {
 }
 
 pub fn note(config: &Config, path: &str) -> Result<()> {
+    let path = path.trim();
+
     trace!("Path {}", path);
 
     let file_path = get_path(&config.note_path, path);
