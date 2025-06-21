@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/joshuachp/note/compare/v0.1.0...v0.1.1) (2025-06-21)
+
+
+### Bug Fixes
+
+* **edit:** trim whitespace in file name ([0c9b7f4](https://github.com/joshuachp/note/commit/0c9b7f484a41b1720d174e22eaf0d8457749cec7))
+* **edit:** trim whitespace in file name ([687389d](https://github.com/joshuachp/note/commit/687389da3185092ddabe7cc16a4a2cb9b5019dcc))
+
 ## [0.1.0](https://github.com/joshuachp/note/compare/v0.1.1...v0.1.0) (2025-02-18)
 
 
