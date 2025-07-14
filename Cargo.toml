@@ -28,7 +28,7 @@ toml = "0.8.23"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 walkdir = "2.5.0"
-winnow = "0.7.11"
+winnow = "0.7.12"
 yaml-rust2 = "0.10.3"
 
 [dev-dependencies]
