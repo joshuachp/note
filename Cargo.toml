@@ -10,25 +10,25 @@ description = "Note taking utility"
 
 [dependencies]
 chrono = { version = "0.4.41", features = ["serde"] }
-clap = { version = "4.5.40", features = ["derive"] }
-clap_complete = "4.5.54"
-clap_mangen = "0.2.27"
+clap = { version = "4.5.41", features = ["derive"] }
+clap_complete = "4.5.55"
+clap_mangen = "0.2.28"
 color-eyre = "0.6.5"
 dirs = "6.0.0"
 env_logger = "0.11.8"
 eyre = "0.6.12"
-indexmap = { version = "2.9.0", features = ["serde"] }
+indexmap = { version = "2.10.0", features = ["serde"] }
 pulldown-cmark = { version = "0.13.0", features = ["serde"] }
 regex = "1.11.1"
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
-tantivy = "0.24.1"
+serde_json = "1.0.141"
+tantivy = "0.24.2"
 thiserror = "2.0.12"
 toml = "0.8.23"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 walkdir = "2.5.0"
-winnow = "0.7.11"
+winnow = "0.7.12"
 yaml-rust2 = "0.10.3"
 
 [dev-dependencies]
