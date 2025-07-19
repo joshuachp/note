@@ -307,7 +307,7 @@ fn parse_front_matter(source: &str) -> Result<FrontMatter, FrontMatterError> {
     })
 }
 
-pub fn parse(mut markdown: &str) -> Result<Markdown, Error> {
+pub fn parse(mut markdown: &str) -> Result<Markdown<'_>, Error> {
     let metadata = front_matter
         .parse_next(&mut markdown)
         .map_err(Error::FrontMatter)?;
