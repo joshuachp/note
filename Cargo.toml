@@ -17,7 +17,7 @@ color-eyre = "0.6.5"
 dirs = "6.0.0"
 env_logger = "0.11.8"
 eyre = "0.6.12"
-indexmap = { version = "2.10.0", features = ["serde"] }
+indexmap = { version = "2.11.0", features = ["serde"] }
 pulldown-cmark = { version = "0.13.0", features = ["serde"] }
 regex = "1.11.1"
 serde = { version = "1.0.219", features = ["derive"] }
