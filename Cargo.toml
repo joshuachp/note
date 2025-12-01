@@ -11,7 +11,7 @@ description = "Note taking utility"
 [dependencies]
 chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.50", features = ["derive"] }
-clap_complete = "4.5.59"
+clap_complete = "4.5.61"
 clap_mangen = "0.2.31"
 color-eyre = "0.6.5"
 dirs = "6.0.0"
