@@ -15,7 +15,7 @@ env:
   RUSTC_WRAPPER: "sccache"
   RUSTFLAGS: -D warnings
   RUSTDOCFLAGS: -D warnings
-  MAIN_PACKAGE: "@MAIN_CRATE@"
+  MAIN_CRATE: "@MAIN_CRATE@"
 jobs:
   fmt:
     runs-on: ubuntu-24.04
@@ -67,7 +67,7 @@ jobs:
       - name: cargo hack test
         # Doesn't test all combination of features, but the space is becoming too large and it takes
         # too long
-        run: cargo hack --each-feature test --locked -p "$MAIN_PACKAGE"
+        run: cargo hack --each-feature test --locked -p "$MAIN_CRATE"
   minimal-versions:
     runs-on: ubuntu-24.04
     steps:
