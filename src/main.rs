@@ -10,7 +10,7 @@ use clap::Parser;
 use color_eyre::eyre::WrapErr;
 use config::Config;
 use tracing::{debug, trace};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     cli::{Cli, Command},

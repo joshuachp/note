@@ -1,8 +1,8 @@
 use std::process::Command;
 
 use color_eyre::{
-    eyre::{ensure, Context},
     Result,
+    eyre::{Context, ensure},
 };
 
 use crate::config::Config;

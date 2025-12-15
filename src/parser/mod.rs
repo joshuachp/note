@@ -3,10 +3,10 @@ use std::{collections::HashSet, fmt::Write, str::FromStr};
 use chrono::NaiveDate;
 use pulldown_cmark::{CodeBlockKind, Event, Options, Tag};
 use winnow::{
+    Parser,
     ascii::line_ending,
     combinator::{alt, delimited, eof},
     token::take_until,
-    Parser,
 };
 use yaml_rust2::Yaml;
 

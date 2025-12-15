@@ -3,16 +3,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use color_eyre::eyre::{self, ensure, Context, OptionExt};
+use color_eyre::eyre::{self, Context, OptionExt, ensure};
 use dirs::cache_dir;
 use note::parser::parse;
 use tantivy::{
+    DocAddress, Document, Index, IndexWriter, Score, TantivyDocument,
     collector::TopDocs,
     directory::MmapDirectory,
     doc,
     query::QueryParser,
-    schema::{Field, SchemaBuilder, STORED, TEXT},
-    DocAddress, Document, Index, IndexWriter, Score, TantivyDocument,
+    schema::{Field, STORED, SchemaBuilder, TEXT},
 };
 use tracing::{debug, error, trace};
 use walkdir::WalkDir;
