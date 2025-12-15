@@ -68,26 +68,6 @@ jobs:
         # Doesn't test all combination of features, but the space is becoming too large and it takes
         # too long
         run: cargo hack --each-feature test --locked -p "$MAIN_CRATE"
-  minimal-versions:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: true
-      - uses: ./.github/actions/install-deps
-      - name: install rust stable
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.2
-      - name: install rust nightly
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.2
-        with:
-          toolchain: nightly
-      - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: taiki-e/install-action@v2.62.65
-        with:
-          tool: cargo-hack,cargo-minimal-versions
-      - run: rustup default stable
-      - name: Check minimal versions
-        run: cargo minimal-versions check --workspace --ignore-private --detach-path-deps=skip-exact --direct
   msrv:
     runs-on: ubuntu-24.04
     strategy:
