@@ -5,6 +5,7 @@ categories = ["command-line-utility"]
 edition = "2024"
 keywords = ["notes", "journal", "cli"]
 license = "APACHE-2.0 OR MIT"
+publish = false
 repository = "https://github.com/joshuachp/note"
 description = "Note taking utility"
 
