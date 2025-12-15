@@ -23,3 +23,5 @@ jobs:
     uses: ./.github/workflows/check.yaml
   test:
     uses: ./.github/workflows/test.yaml
+    # Pass Codecov secret
+    secrets: inherit
