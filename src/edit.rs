@@ -1,7 +1,7 @@
 use chrono::{Local, NaiveDate};
 use color_eyre::{
-    eyre::{ensure, Context},
     Result,
+    eyre::{Context, ensure},
 };
 use std::{
     fs, io,
