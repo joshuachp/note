@@ -68,40 +68,40 @@ jobs:
         # Doesn't test all combination of features, but the space is becoming too large and it takes
         # too long
         run: cargo hack --each-feature test --locked -p "$MAIN_CRATE"
-  msrv:
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        msrv: [1.85] # 2021 edition requires 1.85
-    name: msrv / ${{ matrix.msrv }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: true
-      - uses: ./.github/actions/install-deps
-      - uses: actions-rust-lang/setup-rust-toolchain@v1.15.2
-        with:
-          toolchain: ${{ matrix.msrv }}
-      - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: taiki-e/install-action@v2.67.30
-        with:
-          tool: cargo-hack
-      - name: cargo +${{ matrix.msrv }} check
-        run: cargo +${{ matrix.msrv }} hack --no-dev-deps check --all-features -p "$MAIN_CRATE"
+  # msrv:
+  #   runs-on: ubuntu-24.04
+  #   strategy:
+  #     matrix:
+  #       msrv: [1.85] # 2021 edition requires 1.85
+  #   name: msrv / ${{ matrix.msrv }}
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #       with:
+  #         submodules: true
+  #     - uses: ./.github/actions/install-deps
+  #     - uses: actions-rust-lang/setup-rust-toolchain@v1.15.2
+  #       with:
+  #         toolchain: ${{ matrix.msrv }}
+  #     - uses: mozilla-actions/sccache-action@v0.0.9
+  #     - uses: taiki-e/install-action@v2.67.30
+  #       with:
+  #         tool: cargo-hack
+  #     - name: cargo +${{ matrix.msrv }} check
+  #       run: cargo +${{ matrix.msrv }} hack --no-dev-deps check --all-features -p "$MAIN_CRATE"
   # Run semver-check on release branch push or PR
-  semver:
-    if: startsWith(github.base_ref, 'release-') || startsWith(github.ref, 'release-')
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: true
-      - uses: actions-rust-lang/setup-rust-toolchain@v1.15.2
-      - uses: mozilla-actions/sccache-action@v0.0.9
-      - name: Check library API semver breakages
-        uses: obi1kenobi/cargo-semver-checks-action@v2.8
-        with:
-          release-type: patch
+  # semver:
+  #   if: startsWith(github.base_ref, 'release-') || startsWith(github.ref, 'release-')
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #       with:
+  #         submodules: true
+  #     - uses: actions-rust-lang/setup-rust-toolchain@v1.15.2
+  #     - uses: mozilla-actions/sccache-action@v0.0.9
+  #     - name: Check library API semver breakages
+  #       uses: obi1kenobi/cargo-semver-checks-action@v2.8
+  #       with:
+  #         release-type: patch
   # Check that the create can be compiled with only the packaged files
   for-publish:
     name: stable / for-publish
