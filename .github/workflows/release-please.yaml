@@ -21,13 +21,3 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-  upload-sources:
-    name: upload sources
-    needs: [release-please]
-    uses: ./.github/workflows/rpm-release.yaml
-    secrets: inherit
-    permissions:
-      contents: write
-    if: ${{ fromJSON(needs.release-please.outputs.release).release_created }}
-    with:
-      tag: ${{ fromJson(needs.release-please.outputs.release).tag_name }}
