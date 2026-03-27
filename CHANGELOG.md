@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/joshuachp/note/compare/v0.1.1...v0.2.0) (2026-03-27)
+
+
+### Features
+
+* **work:** add work command ([de303f8](https://github.com/joshuachp/note/commit/de303f87978a48ce18f811c804657cad161ddd8d))
+* **work:** add work command ([f8e50d4](https://github.com/joshuachp/note/commit/f8e50d4f9cffadec8be6f7700823f07946d2f03d))
+
 ## [0.1.1](https://github.com/joshuachp/note/compare/v0.1.0...v0.1.1) (2025-06-21)
 
 
