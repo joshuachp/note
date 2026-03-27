@@ -4,7 +4,6 @@ mod edit;
 mod list;
 mod query;
 mod search;
-mod sync;
 
 use clap::Parser;
 use color_eyre::eyre::WrapErr;
@@ -18,7 +17,6 @@ use crate::{
     list::list_path,
     query::query,
     search::{find_file, grep_content},
-    sync::execute_command,
 };
 
 fn main() -> color_eyre::Result<()> {
@@ -44,7 +42,8 @@ fn main() -> color_eyre::Result<()> {
     match cli.command {
         Some(command) => match command {
             Command::Edit(edit) => note(&config, &edit.path),
-            Command::Journal { date } => journal(&config, date.as_deref()),
+            Command::Journal { date } => journal(&config, "journal", date.as_deref()),
+            Command::Work { date } => journal(&config, "work", date.as_deref()),
             Command::Todo => note(&config, "todo"),
             Command::Search { content } => {
                 let content = content.as_deref().unwrap_or("");
@@ -59,7 +58,6 @@ fn main() -> color_eyre::Result<()> {
 
                 Ok(())
             }
-            Command::Sync => execute_command(&config),
             Command::List { path, max_depth } => list_path(&config, path, max_depth),
             Command::Query { search } => query(&search, &config),
             Command::Utils { .. } => {

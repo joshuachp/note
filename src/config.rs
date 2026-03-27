@@ -10,7 +10,6 @@ struct ConfigFile {
     #[serde(default)]
     change_dir: bool,
     note_path: Option<String>,
-    sync_command: String,
     find_command: String,
     search_command: String,
 }
@@ -22,7 +21,6 @@ impl Default for ConfigFile {
             editor: Default::default(),
             change_dir: true,
             note_path: Default::default(),
-            sync_command: String::new(),
             find_command: String::new(),
             search_command: String::new(),
         }
@@ -35,7 +33,6 @@ pub struct Config {
     pub editor: String,
     pub change_dir: bool,
     pub note_path: PathBuf,
-    pub sync_command: String,
     pub find_command: String,
     pub search_command: String,
 }
@@ -78,7 +75,6 @@ impl Config {
             editor,
             note_path,
             change_dir: config.change_dir,
-            sync_command: config.sync_command,
             find_command: config.find_command,
             search_command: config.search_command,
         })
