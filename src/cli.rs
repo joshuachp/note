@@ -34,6 +34,12 @@ pub enum Command {
         /// Journal entry to edit, in the Y-m-d format
         date: Option<String>,
     },
+    /// Opens the work journal
+    #[command(visible_alias("w"))]
+    Work {
+        /// Work entry to edit, in the Y-m-d format
+        date: Option<String>,
+    },
     /// Opens the todo file
     #[command(visible_alias("t"))]
     Todo,
@@ -55,8 +61,6 @@ pub enum Command {
         // The search query.
         search: String,
     },
-    /// Sync the notes using the configured sync command
-    Sync,
     /// List the notes in $NOTE_PATH or the current directory.
     #[command(visible_alias("ls"))]
     List {

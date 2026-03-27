@@ -85,13 +85,13 @@ pub fn note(config: &Config, path: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn journal(config: &Config, date: Option<&str>) -> Result<()> {
+pub fn journal(config: &Config, base: &str, date: Option<&str>) -> Result<()> {
     let date = match date {
         Some(date) => NaiveDate::from_str(date).context(format!("failed to parse date {date}"))?,
         None => Local::now().date_naive(),
     };
 
-    let mut entry = PathBuf::from("journal");
+    let mut entry = PathBuf::from(base);
     entry.push(date.to_string());
     entry.set_extension("md");
 
