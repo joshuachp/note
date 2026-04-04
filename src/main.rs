@@ -1,13 +1,6 @@
-mod cli;
-mod config;
-mod edit;
-mod list;
-mod query;
-mod search;
-
 use clap::Parser;
-use color_eyre::eyre::WrapErr;
 use config::Config;
+use eyre::WrapErr;
 use tracing::{debug, trace};
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -19,13 +12,22 @@ use crate::{
     search::{find_file, grep_content},
 };
 
-fn main() -> color_eyre::Result<()> {
+mod cli;
+mod config;
+mod edit;
+mod list;
+mod query;
+mod search;
+
+fn main() -> eyre::Result<()> {
     let cli = Cli::parse();
 
     color_eyre::install()?;
+
     tracing_subscriber::registry()
         .with(EnvFilter::from_default_env())
         .with(tracing_subscriber::fmt::layer())
+        .with(tracing_error::ErrorLayer::default())
         .try_init()?;
 
     trace!("{:?}", cli);

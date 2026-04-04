@@ -1,18 +1,29 @@
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::str::FromStr;
+use std::{fs, io};
+
+use askama::Template;
 use chrono::{Local, NaiveDate};
-use color_eyre::{
-    Result,
-    eyre::{Context, ensure},
-};
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-    process::Command,
-    str::FromStr,
-};
-use tracing::{debug, trace, warn};
+use color_eyre::Result;
+use eyre::{Context, ensure};
+
+use tracing::{debug, instrument, trace, warn};
 
 use crate::config::Config;
 
+#[derive(Debug, Template)]
+#[template(path = "note.md", print = "code")]
+struct Note {
+    title: String,
+    description: Option<String>,
+    created_at: String,
+    updated_at: Option<String>,
+    lang: Option<String>,
+    tags: Vec<String>,
+}
+
+#[instrument]
 fn get_path(base_path: &Path, path: &str) -> PathBuf {
     let mut file_path = PathBuf::from(base_path);
 
@@ -21,8 +32,9 @@ fn get_path(base_path: &Path, path: &str) -> PathBuf {
         .map(|chr| {
             if chr.is_whitespace() {
                 return '_';
+            } else {
+                chr.to_ascii_lowercase()
             }
-            chr.to_ascii_lowercase()
         })
         .collect();
 
@@ -36,10 +48,11 @@ fn get_path(base_path: &Path, path: &str) -> PathBuf {
     file_path
 }
 
+#[instrument(skip(config))]
 pub fn note(config: &Config, path: &str) -> Result<()> {
     let path = path.trim();
 
-    trace!("Path {}", path);
+    trace!(path);
 
     let file_path = get_path(&config.note_path, path);
 
@@ -85,9 +98,12 @@ pub fn note(config: &Config, path: &str) -> Result<()> {
     Ok(())
 }
 
+#[instrument(skip(config))]
 pub fn journal(config: &Config, base: &str, date: Option<&str>) -> Result<()> {
     let date = match date {
-        Some(date) => NaiveDate::from_str(date).context(format!("failed to parse date {date}"))?,
+        Some(date) => {
+            NaiveDate::from_str(date).wrap_err_with(|| format!("failed to parse date {date}"))?
+        }
         None => Local::now().date_naive(),
     };
 
