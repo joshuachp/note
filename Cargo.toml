@@ -10,6 +10,7 @@ repository = "https://github.com/joshuachp/note"
 description = "Note taking utility"
 
 [dependencies]
+askama = "0.15.6"
 chrono = { version = "0.4.44", features = ["serde"] }
 clap = { version = "4.6.0", features = ["derive"] }
 clap_complete = "4.6.0"
@@ -23,10 +24,12 @@ pulldown-cmark = { version = "0.13.3", features = ["serde"] }
 regex = "1.12.3"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-tantivy = "0.25.0"
+sha2 = "0.11.0"
+tantivy = "0.26.0"
 thiserror = "2.0.18"
 toml = "1.1.2"
 tracing = "0.1.44"
+tracing-error = "0.2.1"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 walkdir = "2.5.0"
 winnow = "1.0.1"
