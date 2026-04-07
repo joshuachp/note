@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/joshuachp/note/compare/v0.2.0...v0.3.0) (2026-04-07)
+
+
+### Features
+
+* **template:** fill the template when creating the file ([d22c9ff](https://github.com/joshuachp/note/commit/d22c9ffe3f1e495e8f925619e1ef7b1e70a5e5f3))
+* **template:** fill the template when creating the file ([132a097](https://github.com/joshuachp/note/commit/132a097f088592dc6cb46644aaf203af4faac856))
+
 ## [0.2.0](https://github.com/joshuachp/note/compare/v0.1.1...v0.2.0) (2026-03-27)
 
 
