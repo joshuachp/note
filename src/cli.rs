@@ -9,6 +9,7 @@ use regex::Regex;
 
 /// Note taking utility
 #[derive(Debug, Parser)]
+#[clap(version, about)]
 pub struct Cli {
     /// General sub commands
     #[clap(subcommand)]
