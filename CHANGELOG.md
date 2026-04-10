@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/joshuachp/note/compare/v0.3.0...v0.4.0) (2026-04-10)
+
+
+### Features
+
+* **journal:** improve the note template ([bcd2172](https://github.com/joshuachp/note/commit/bcd2172afa3e35c9a6bd1ef1e78d4631fdd46dec))
+* **journal:** improve the note template ([62853d1](https://github.com/joshuachp/note/commit/62853d16af4d8494b38f6fdb50ac7e8b479101b6))
+
 ## [0.3.0](https://github.com/joshuachp/note/compare/v0.2.0...v0.3.0) (2026-04-07)
 
 
