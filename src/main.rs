@@ -12,6 +12,8 @@ use crate::{
     search::{find_file, grep_content},
 };
 
+use self::edit::work;
+
 mod cli;
 mod config;
 mod edit;
@@ -44,8 +46,8 @@ fn main() -> eyre::Result<()> {
     match cli.command {
         Some(command) => match command {
             Command::Edit(edit) => note(&config, &edit.path),
-            Command::Journal { date } => journal(&config, "journal", date.as_deref()),
-            Command::Work { date } => journal(&config, "work", date.as_deref()),
+            Command::Journal { date } => journal(&config, date.as_deref()),
+            Command::Work { date } => work(&config, date.as_deref()),
             Command::Todo => note(&config, "todo"),
             Command::Search { content } => {
                 let content = content.as_deref().unwrap_or("");

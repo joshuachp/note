@@ -6,13 +6,50 @@ use std::{fs, io};
 
 use askama::Template;
 use chrono::{Local, NaiveDate};
-use color_eyre::Result;
-use eyre::{Context, ContextCompat, ensure};
+use eyre::{self, Context, ensure};
 
 use sha2::Digest;
-use tracing::{debug, error, instrument, trace, warn};
+use tracing::{debug, error, info, instrument, trace, warn};
 
 use crate::config::Config;
+
+/// Edit a note
+#[instrument(skip(config))]
+pub fn note(config: &Config, path: &str) -> eyre::Result<()> {
+    let note_path = NoteArgs::parse(&config.note_path, path)?;
+
+    let note = Note::now(note_path.title);
+
+    note.edit(config, &note_path.path)
+}
+
+/// Edit a journal entry
+#[instrument(skip(config))]
+pub fn journal(config: &Config, date: Option<&str>) -> eyre::Result<()> {
+    let entry = JournalArgs::entry("journal", date)?;
+
+    let mut note = Note::now(format!("Journal {}", entry.date));
+
+    note.description = Some(format!("Daily notes for the {}", entry.date));
+    note.tags.push("journal".to_string());
+    note.lang = Some("en".to_string());
+
+    note.edit(config, &entry.path)
+}
+
+/// Edit a work journal entry
+#[instrument(skip(config))]
+pub fn work(config: &Config, date: Option<&str>) -> eyre::Result<()> {
+    let entry = JournalArgs::entry("work", date)?;
+
+    let mut note = Note::now(format!("Work {}", entry.date));
+
+    note.description = Some(format!("Work daily notes for the {}", entry.date));
+    note.tags.extend(["journal", "work"].map(str::to_string));
+    note.lang = Some("en".to_string());
+
+    note.edit(config, &entry.path)
+}
 
 #[derive(Debug)]
 struct State {
@@ -28,7 +65,7 @@ impl State {
         }
     }
 
-    fn update(&mut self, buf: &[u8]) -> Result<(), io::Error> {
+    fn update(&mut self, buf: &[u8]) -> io::Result<()> {
         self.hash.update(buf);
         self.bytes += u64::try_from(buf.len()).map_err(|error| {
             error!(%error,"couldn't convert written bytes");
@@ -130,28 +167,6 @@ impl Note {
         }
     }
 
-    #[instrument(skip(config))]
-    fn with_path(config: &Config, path: &str) -> eyre::Result<Self> {
-        let path = path.trim();
-        let path = get_path(&config.note_path, path);
-
-        let title = path
-            .file_prefix()
-            .wrap_err("missing file name")?
-            .to_str()
-            .wrap_err("non UTF-8 file name")?;
-
-        let title = title.replace('_', " ");
-
-        let (first, rest) = title.split_at(1);
-
-        let mut title = first.to_uppercase();
-
-        title += rest;
-
-        Ok(Self::now(title))
-    }
-
     #[instrument(skip(self))]
     fn create_note(&self, file: &Path) -> eyre::Result<()> {
         let file = fs::File::options()
@@ -162,6 +177,10 @@ impl Note {
         let mut file = BufWriter::new(file);
 
         self.write_into(&mut file)?;
+
+        file.flush()?;
+
+        info!("note created");
 
         Ok(())
     }
@@ -193,16 +212,12 @@ impl Note {
         Ok(file.state.hash.finalize() == sink.state.hash.finalize())
     }
 
-    #[instrument]
-    fn edit(&self, config: &Config, path: &str) -> eyre::Result<()> {
-        let path = path.trim();
-
-        trace!(path);
-
-        let file_path = get_path(&config.note_path, path);
+    #[instrument(skip(self, config))]
+    fn edit(&self, config: &Config, note_path: &Path) -> eyre::Result<()> {
+        let abs_path = config.note_path.join(note_path);
 
         // TODO: if parent doesn't exist create a temp file and then move it if file exists after edit
-        if let Some(parent) = file_path.parent() {
+        if let Some(parent) = abs_path.parent() {
             trace!("Parent {:?}", parent);
 
             if !parent.is_dir() {
@@ -213,32 +228,28 @@ impl Note {
         }
 
         // Ensure path, if it exists, it has to be a file.
-        let _is_new = match fs::metadata(&file_path) {
+        let is_new = match fs::metadata(&abs_path) {
             Ok(metadata) => {
                 ensure!(metadata.is_file(), "not a file");
 
                 false
             }
             Err(err) if err.kind() == io::ErrorKind::NotFound => {
-                debug!(file = %file_path.display(), "file does not exists");
+                debug!(file = %abs_path.display(), "file does not exists");
 
-                self.create_note(&file_path)?;
+                self.create_note(&abs_path)?;
 
                 true
             }
             Err(err) => {
-                return Err(err).wrap_err_with(|| format!("reading file metadata: {file_path:?}"));
+                return Err(err)
+                    .wrap_err_with(|| format!("reading file metadata: {}", abs_path.display()));
             }
         };
 
-        let mut command = Command::new(&config.editor);
-        command.args([&file_path]);
-
-        if config.change_dir {
-            command.current_dir(&config.note_path);
-        }
-
-        let status = command
+        let status = Command::new(&config.editor)
+            .args([&note_path])
+            .current_dir(&config.note_path)
             .spawn()
             .context("failed to spawn editor")?
             .wait()
@@ -251,63 +262,88 @@ impl Note {
             "editor returned with status code {status}"
         );
 
-        if self.is_template(&file_path)? {
+        if is_new && self.is_template(&abs_path)? {
             debug!("file was not edited, removing");
 
-            fs::remove_file(&file_path)?;
+            fs::remove_file(&abs_path)?;
         }
 
         Ok(())
     }
 }
 
-#[instrument]
-fn get_path(base_path: &Path, path: &str) -> PathBuf {
-    let mut file_path = PathBuf::from(base_path);
-
-    let path_string: String = path
-        .chars()
-        .map(|chr| {
-            if chr.is_whitespace() {
-                '_'
-            } else {
-                chr.to_ascii_lowercase()
-            }
-        })
-        .collect();
-
-    trace!("{}", path_string);
-
-    file_path.push(path_string);
-    file_path.set_extension("md");
-
-    trace!(file_path = %file_path.display());
-
-    file_path
+#[derive(Debug)]
+struct NoteArgs {
+    title: String,
+    path: PathBuf,
 }
 
-#[instrument(skip(config))]
-pub fn note(config: &Config, path: &str) -> Result<()> {
-    let note = Note::with_path(config, path)?;
+impl NoteArgs {
+    #[instrument(ret)]
+    fn parse(base_path: &Path, path: &str) -> eyre::Result<Self> {
+        let path = path.trim();
 
-    note.edit(config, path)
-}
-
-#[instrument(skip(config))]
-pub fn journal(config: &Config, base: &str, date: Option<&str>) -> Result<()> {
-    let date = match date {
-        Some(date) => {
-            NaiveDate::from_str(date).wrap_err_with(|| format!("failed to parse date {date}"))?
+        // No need to check whitespace since we trimmed
+        if path.is_empty() {
+            return Err(eyre::eyre!("note name cannot be empty"));
         }
-        None => Local::now().date_naive(),
-    };
 
-    let mut entry = PathBuf::from(base);
-    entry.push(date.to_string());
-    entry.set_extension("md");
+        let title = Self::note_title(path);
+        let path = Self::file_path(base_path, path);
 
-    let path = entry.to_string_lossy();
-    let note = Note::with_path(config, &path)?;
+        Ok(Self { title, path })
+    }
 
-    note.edit(config, &path)
+    fn note_title(path: &str) -> String {
+        let title = path.replace('_', " ");
+
+        let (first, rest) = title.split_at(1);
+
+        let mut title = first.to_uppercase();
+
+        title += rest;
+
+        title
+    }
+
+    fn file_path(base_path: &Path, path: &str) -> PathBuf {
+        let path_str: String = path
+            .chars()
+            .map(|chr| {
+                if chr.is_whitespace() {
+                    '_'
+                } else {
+                    chr.to_ascii_lowercase()
+                }
+            })
+            .collect();
+
+        let mut file_path = PathBuf::from(base_path);
+        file_path.push(&path_str);
+        file_path.set_extension("md");
+
+        file_path
+    }
+}
+
+#[derive(Debug)]
+struct JournalArgs {
+    date: NaiveDate,
+    path: PathBuf,
+}
+
+impl JournalArgs {
+    fn entry(base: impl AsRef<Path>, date: Option<&str>) -> eyre::Result<Self> {
+        let date = match date {
+            Some(date) => NaiveDate::from_str(date)
+                .wrap_err_with(|| format!("failed to parse date {date}"))?,
+            None => Local::now().date_naive(),
+        };
+
+        let mut path = PathBuf::from(base.as_ref());
+        path.push(date.to_string());
+        path.set_extension("md");
+
+        Ok(Self { date, path })
+    }
 }
