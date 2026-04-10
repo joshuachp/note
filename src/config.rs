@@ -3,25 +3,13 @@ use std::{env, fs, path::PathBuf};
 use color_eyre::eyre::{Context, OptionExt};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 struct ConfigFile {
     shell: Option<String>,
     editor: Option<String>,
     note_path: Option<String>,
     find_command: String,
     search_command: String,
-}
-
-impl Default for ConfigFile {
-    fn default() -> Self {
-        Self {
-            shell: Default::default(),
-            editor: Default::default(),
-            note_path: Default::default(),
-            find_command: String::new(),
-            search_command: String::new(),
-        }
-    }
 }
 
 #[derive(Debug, Default)]
