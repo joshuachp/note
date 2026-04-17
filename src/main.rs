@@ -1,3 +1,5 @@
+use std::io::IsTerminal;
+
 use clap::Parser;
 use config::Config;
 use eyre::WrapErr;
@@ -28,7 +30,11 @@ fn main() -> eyre::Result<()> {
 
     tracing_subscriber::registry()
         .with(EnvFilter::from_default_env())
-        .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_writer(std::io::stderr)
+                .with_ansi(std::io::stderr().is_terminal()),
+        )
         .with(tracing_error::ErrorLayer::default())
         .try_init()?;
 
