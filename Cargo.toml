@@ -12,7 +12,7 @@ description = "Note taking utility"
 [dependencies]
 askama = "0.15.6"
 chrono = { version = "0.4.44", features = ["serde"] }
-clap = { version = "4.6.0", features = ["derive"] }
+clap = { version = "4.6.1", features = ["derive"] }
 clap_complete = "4.6.2"
 clap_mangen = "0.3.0"
 color-eyre = "0.6.5"
