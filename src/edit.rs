@@ -255,7 +255,7 @@ impl Note {
             .wait()
             .context("failed to wait to editor")?;
 
-        trace!(%status, "editior exited");
+        trace!(%status, "editor exited");
 
         ensure!(
             status.success(),
