@@ -20,10 +20,10 @@ dirs = "6.0.0"
 env_logger = "0.11.9"
 eyre = "0.6.12"
 indexmap = { version = "2.14.0", features = ["serde"] }
-pulldown-cmark = { version = "0.13.3", features = ["serde"] }
+pulldown-cmark = { version = "0.13.4", features = ["serde"] }
 regex = "1.12.3"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 sha2 = "0.11.0"
 tantivy = "0.26.1"
 thiserror = "2.0.18"
